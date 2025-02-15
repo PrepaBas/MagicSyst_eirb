@@ -1,5 +1,7 @@
 #include <Arduino.h>
-
+#include <time.h>
+#include <robot_movements.h>
+#include <advanced_movements.h>
 // put function declarations here:
 int myFunction(int, int);
 
