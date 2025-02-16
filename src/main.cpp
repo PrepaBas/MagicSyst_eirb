@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <time.h>
-#include <robot_movements.h>
-#include <advanced_movements.h>
+#include "StepperMotor.h"
+#include "advanced_movement.h"
 // put function declarations here:
 int myFunction(int, int);
 

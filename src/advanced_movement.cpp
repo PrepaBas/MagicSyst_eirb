@@ -4,10 +4,12 @@
 #include "Arduino.h"
 
 /* file header file */
-#include "movement.h"
+#include "advanced_movement.h"
 
 /* ---------------------------------------------------------------------*/
-RobotCoupe::RobotCoupe(){
+RobotCoupe::RobotCoupe(float baseWidth, float wheelRadius){
+    _baseWidth = baseWidth;
+    _wheelRadius = wheelRadius;
 }
 
 /* Setters and Getters -------------------------------------------------------*/
@@ -28,13 +30,10 @@ void RobotCoupe::move_straight (char direction, float distance){
     /* Move robot in a straight line
      * direction :  1 for Forward
      *              0 for Backward */
-    long m_steps = MICRO_STEPS * distance / (2. * PI * _wheelRadius); // Implicit conversion
-    //motors[0]->prepare_move(direction?(StepperMotor::BWD):(StepperMotor::FWD), m_steps);
-    //motors[1]->prepare_move(direction?(StepperMotor::FWD):(StepperMotor::BWD), m_steps);
-    //x_nucleo_ihm02a1->perform_prepared_actions();
-    motors[1]->move(direction?(StepperMotor::FWD):(StepperMotor::BWD), m_steps);
-    delay(10);
-    motors[0]->move(direction?(StepperMotor::BWD):(StepperMotor::FWD), m_steps);
+    long m_steps = moto * distance / (2. * PI * _wheelRadius); // Implicit conversion
+
+    motors[1].move(direction, m_steps);
+    motors[0].move(direction, m_steps);
 }
 
 void RobotCoupe::rotate (int direction, float angle){
@@ -43,9 +42,8 @@ void RobotCoupe::rotate (int direction, float angle){
      *              1 for right rotation (clockwise) */
     float distance = angle * _baseWidth / 360.;
     long m_steps = MICRO_STEPS * distance / (2. * _wheelRadius);
-    motors[0]->prepare_move(direction?(StepperMotor::BWD):(StepperMotor::FWD), m_steps);
-    motors[1]->prepare_move(direction?(StepperMotor::BWD):(StepperMotor::FWD), m_steps);
-    x_nucleo_ihm02a1->perform_prepared_actions();
+    motors[0].prepare_move(direction, m_steps);
+    motors[1].prepare_move(direction, m_steps);
 }
 
 
