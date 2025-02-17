@@ -6,10 +6,14 @@
 /* file header file */
 #include "advanced_movement.h"
 
+#define MICRO_STEPS 200 * 16
 /* ---------------------------------------------------------------------*/
 RobotCoupe::RobotCoupe(float baseWidth, float wheelRadius){
     _baseWidth = baseWidth;
     _wheelRadius = wheelRadius;
+    for(int i=0; i<2; i++){
+        motors[i].begin();
+    }
 }
 
 /* Setters and Getters -------------------------------------------------------*/
@@ -30,7 +34,7 @@ void RobotCoupe::move_straight (char direction, float distance){
     /* Move robot in a straight line
      * direction :  1 for Forward
      *              0 for Backward */
-    long m_steps = moto * distance / (2. * PI * _wheelRadius); // Implicit conversion
+    long m_steps = MICRO_STEPS * distance / (2. * PI * _wheelRadius); // Implicit conversion
 
     motors[1].move(direction, m_steps);
     motors[0].move(direction, m_steps);
@@ -42,8 +46,8 @@ void RobotCoupe::rotate (int direction, float angle){
      *              1 for right rotation (clockwise) */
     float distance = angle * _baseWidth / 360.;
     long m_steps = MICRO_STEPS * distance / (2. * _wheelRadius);
-    motors[0].prepare_move(direction, m_steps);
-    motors[1].prepare_move(direction, m_steps);
+    motors[0].move(direction, m_steps);
+    motors[1].move(direction, m_steps);
 }
 
 
@@ -79,9 +83,7 @@ void RobotCoupe::go_to(struct position pos){
     float radius = sqrt(x*x+y*y);
     float angle = atan2(y, x)*360/(2 * PI);
     RobotCoupe::angle_to(angle);
-    RobotCoupe::wait_stop();
     RobotCoupe::move_straight(0, radius);
-    RobotCoupe::wait_stop();
 
     // Update new position
     RobotCoupe::set_x(pos.x);
@@ -170,34 +172,27 @@ void RobotCoupe::follow_to(struct position pos){
     else if(start_zone== 1){
         struct position destination = {_position.x, table_coupe.bl.y};
         RobotCoupe::go_to(destination);
-        RobotCoupe::wait_stop();
     }
     else if(start_zone== 2){
         RobotCoupe::go_to(table_coupe.br);
-        RobotCoupe::wait_stop();
     }
     else if(start_zone== 3){
         struct position destination = {table_coupe.br.x, _position.y};
         RobotCoupe::go_to(destination);
-        RobotCoupe::wait_stop();
     }
     else if(start_zone== 4){
         RobotCoupe::go_to(table_coupe.tr);
-        RobotCoupe::wait_stop();
     }
     else if(start_zone== 5){
         struct position destination = {_position.x, table_coupe.tr.y};
         RobotCoupe::go_to(destination);
-        RobotCoupe::wait_stop();
     }
     else if(start_zone== 6){
         RobotCoupe::go_to(table_coupe.tl);
-        RobotCoupe::wait_stop();
     }
     else if(start_zone== 7){
         struct position destination = {table_coupe.bl.x, _position.y};
         RobotCoupe::go_to(destination);
-        RobotCoupe::wait_stop();
     }
     /* Robot is now on circulation path */
 
@@ -233,7 +228,6 @@ void RobotCoupe::follow_to(struct position pos){
         if(x_zone == -1){ x_zone = 7;}
         if(x_zone%2 == 0){ // next zone is a corner
             RobotCoupe::go_to(corner_positon(x_zone));
-            RobotCoupe::wait_stop();
         }
      }
     /* Robot stopped at nearest corner from desired zone */
@@ -245,7 +239,6 @@ void RobotCoupe::follow_to(struct position pos){
     else if(end_zone== 1){
         struct position destination = {pos.x, table_coupe.bl.y};
         RobotCoupe::go_to(destination);
-        RobotCoupe::wait_stop();
         RobotCoupe::go_to(pos);
     }
     else if(end_zone== 2){
@@ -254,7 +247,6 @@ void RobotCoupe::follow_to(struct position pos){
     else if(end_zone== 3){
         struct position destination = {table_coupe.br.x, pos.y};
         RobotCoupe::go_to(destination);
-        RobotCoupe::wait_stop();
         RobotCoupe::go_to(pos);
     }
     else if(end_zone== 4){
@@ -263,7 +255,6 @@ void RobotCoupe::follow_to(struct position pos){
     else if(end_zone== 5){
         struct position destination = {pos.x, table_coupe.tr.y};
         RobotCoupe::go_to(destination);
-        RobotCoupe::wait_stop();
         RobotCoupe::go_to(pos);
     }
     else if(end_zone== 6){
@@ -272,7 +263,6 @@ void RobotCoupe::follow_to(struct position pos){
     else if(end_zone== 7){
         struct position destination = {table_coupe.bl.x, pos.y};
         RobotCoupe::go_to(destination);
-        RobotCoupe::wait_stop();
         RobotCoupe::go_to(pos);
     }
     /* Robot is at desired position */

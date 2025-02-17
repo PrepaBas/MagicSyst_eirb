@@ -7,7 +7,7 @@ StepperMotor::StepperMotor(){
 }
 
 
-bool StepperMotor::rotate(uint8_t dir, uint32_t steps){
+void StepperMotor::move(uint8_t dir, uint32_t steps){
     uint16_t speed_timer; // defines frequency at wich the step_pin is activated to generate shaft speed
 
 
@@ -17,7 +17,6 @@ bool StepperMotor::rotate(uint8_t dir, uint32_t steps){
     uint32_t n = 0; // step counter
     if(steps >= 2* steps_acc){ // case of three distinct speed phases : acceleration, cruise, deceleration
         /* start of acceleration */
-        float speed = 0;
 
         /* instanciation of timers */
         unsigned long t0 = micros(); // start time of acceleration

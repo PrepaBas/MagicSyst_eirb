@@ -45,7 +45,7 @@ class StepperMotor {
     stepper_parameters_t param = {500, 300, 300, STEP_MODE_SIXTEENTH};
     stepper_pinout_t pinout;
     StepperMotor();
-    bool rotate(uint8_t dir, uint32_t steps);
+    void move(uint8_t dir, uint32_t steps);
 
 
 };

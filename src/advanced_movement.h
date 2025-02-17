@@ -8,6 +8,7 @@
 #define movement_h
 
 #include "Arduino.h"
+#include "StepperMotor.h"
 
 struct position {
     float x;
@@ -28,7 +29,7 @@ class RobotCoupe {
   RobotCoupe(float baseWidth, float wheelRadius);
 
   // stepper motors instanciation
-  StepperMotor motor[2];
+  StepperMotor motors[2];
 
   int normal_speed = 300;
   int low_speed = 50;
