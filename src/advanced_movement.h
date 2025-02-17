@@ -1,5 +1,3 @@
-/*
-
 #ifndef movement_h
 #define movement_h
 
@@ -37,8 +35,6 @@ class RobotCoupe {
   void set_x(float x);
   void set_y(float y);
   void set_theta(float theta);
-  void set_baseWidth(float baseWidth);
-  void set_wheelRadius(float wheelRadius);
 
   // Autres methodes
   void move_straight(char direction, float distance);
@@ -50,5 +46,3 @@ class RobotCoupe {
 
 
 #endif
-
-*/

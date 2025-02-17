@@ -5,8 +5,8 @@
 
 /* file header file */
 #include "advanced_movement.h"
+#include "StepperMotor.h"
 
-#define MICRO_STEPS 200 * 16
 /* ---------------------------------------------------------------------*/
 RobotCoupe::RobotCoupe(float baseWidth, float wheelRadius){
     _baseWidth = baseWidth;
@@ -34,7 +34,7 @@ void RobotCoupe::move_straight (char direction, float distance){
     /* Move robot in a straight line
      * direction :  1 for Forward
      *              0 for Backward */
-    long m_steps = MICRO_STEPS * distance / (2. * PI * _wheelRadius); // Implicit conversion
+    long m_steps = motors[0].param.step_mode * 200 * distance / (2. * PI * _wheelRadius); // Implicit conversion
 
     motors[1].move(direction, m_steps);
     motors[0].move(direction, m_steps);
@@ -45,7 +45,7 @@ void RobotCoupe::rotate (int direction, float angle){
      * direction :  0 for left rotation (anti-clockwise)
      *              1 for right rotation (clockwise) */
     float distance = angle * _baseWidth / 360.;
-    long m_steps = MICRO_STEPS * distance / (2. * _wheelRadius);
+    long m_steps = motors[0].param.step_mode * 200 * distance / (2. * _wheelRadius);
     motors[0].move(direction, m_steps);
     motors[1].move(direction, m_steps);
 }

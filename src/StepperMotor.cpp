@@ -17,7 +17,7 @@ void StepperMotor::begin(){
 }
 
 
-bool StepperMotor::move(uint8_t dir, uint32_t steps){
+void StepperMotor::move(uint8_t dir, uint32_t steps){
     digitalWrite(StepperMotor::pinout.dir_pin, dir?HIGH:LOW);
     uint16_t speed_timer; // defines frequency at wich the step_pin is activated to generate shaft speed
 
