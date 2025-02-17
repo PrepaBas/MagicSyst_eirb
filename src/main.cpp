@@ -1,20 +1,18 @@
 #include <Arduino.h>
-#include <time.h>
-#include "StepperMotor.h"
-#include "advanced_movement.h"
-// put function declarations here:
-int myFunction(int, int);
+#include <StepperMotor.h>
+// #include "advanced_movement.h"
+
+StepperMotor motor;
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  
+  motor.pinout = {2, 3, 1, 1, 1, 1, 1};
+  delay(200);
+  motor.begin();
+  delay(200);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  motor.move(0, 1000);
+  delay(1000);
 }

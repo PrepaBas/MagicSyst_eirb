@@ -32,9 +32,9 @@ typedef struct {
 typedef struct {
     uint8_t dir_pin;        // direction pin
     uint8_t step_pin;       // step pin
-    uint8_t ms1p_pin;       // microstepping pin
-    uint8_t ms2p_pin;       // microstepping pin
-    uint8_t ms3p_pin;       // microstepping pin
+    uint8_t ms1_pin;       // microstepping pin
+    uint8_t ms2_pin;       // microstepping pin
+    uint8_t ms3_pin;       // microstepping pin
     uint8_t sleep_pin;      // sleep pin, pull low to disable coils output
     uint8_t rst_pin;        // reset pin, pull low to disable step pin and force motor to reset position
 } stepper_pinout_t;
@@ -45,9 +45,8 @@ class StepperMotor {
     stepper_parameters_t param = {500, 300, 300, STEP_MODE_SIXTEENTH};
     stepper_pinout_t pinout;
     StepperMotor();
-    bool rotate(uint8_t dir, uint32_t steps);
-
-
+    void begin();
+    bool move(uint8_t dir, uint32_t steps);
 };
 
 #endif
