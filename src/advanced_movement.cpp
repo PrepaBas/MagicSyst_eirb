@@ -35,9 +35,9 @@ void RobotCoupe::move_straight (char direction, float distance){
      * direction :  1 for Forward
      *              0 for Backward */
     long m_steps = motors[0].param.step_mode * 200 * distance / (2. * PI * _wheelRadius); // Implicit conversion
-
-    motors[1].move(direction, m_steps);
+    
     motors[0].move(direction, m_steps);
+    motors[1].move(direction, m_steps);
 }
 
 void RobotCoupe::rotate (int direction, float angle){

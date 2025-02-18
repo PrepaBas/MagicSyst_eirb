@@ -8,11 +8,17 @@
 RobotCoupe robot(263, 72/2);
 
 void setup() {
-  robot.motors[0].pinout = {2, 3, 4, 5, 6, 7, 8};
+  robot.motors[0].pinout = {3, 4, 5, 6, 7, 8, 9};
+  robot.motors[1].pinout = {10, 11, 5, 6, 7, 8, 9};
   robot.motors[0].begin();
+  digitalWrite(robot.motors[0].pinout.ms1_pin, HIGH);
+  digitalWrite(robot.motors[0].pinout.ms2_pin, HIGH);
+  digitalWrite(robot.motors[0].pinout.ms2_pin, HIGH);
 }
 
-void loop() {
-  robot.motors[0].move(0, 1000);
+void loop(){
   delay(1000);
+  robot.motors[0].move(1, 100);
+  delay(1000);
+  robot.motors[0].move(0, 100);
 }
