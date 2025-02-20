@@ -30,7 +30,8 @@ typedef struct {
  * @brief driver pinout connections
  */
 typedef struct {
-    uint8_t dir_pin;        // direction pin
+    uint8_t dir1_pin;        // direction pin
+    uint8_t dir2_pin;        // direction pin
     uint8_t step_pin;       // step pin
     uint8_t ms1_pin;       // microstepping pin
     uint8_t ms2_pin;       // microstepping pin
@@ -42,7 +43,7 @@ typedef struct {
 
 class StepperMotor {
     public:
-    stepper_parameters_t param = {5000, 3000, 3000, STEP_MODE_SIXTEENTH};
+    stepper_parameters_t param = {10000, 12000, 12000, STEP_MODE_SIXTEENTH};
     stepper_pinout_t pinout;
     StepperMotor();
     void begin();

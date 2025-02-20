@@ -11,9 +11,8 @@
 RobotCoupe::RobotCoupe(float baseWidth, float wheelRadius){
     _baseWidth = baseWidth;
     _wheelRadius = wheelRadius;
-    for(int i=0; i<2; i++){
-        motors[i].begin();
-    }
+    motors.begin();
+    
 }
 
 /* Setters and Getters -------------------------------------------------------*/
@@ -34,10 +33,10 @@ void RobotCoupe::move_straight (char direction, float distance){
     /* Move robot in a straight line
      * direction :  1 for Forward
      *              0 for Backward */
-    long m_steps = motors[0].param.step_mode * 200 * distance / (2. * PI * _wheelRadius); // Implicit conversion
-    
-    motors[0].move(direction, m_steps);
-    motors[1].move(direction, m_steps);
+    long m_steps = motors.param.step_mode * 200 * distance / (2. * PI * _wheelRadius); // Implicit conversion
+    digitalWrite(motors.pinout.dir1_pin, direction?HIGH:LOW);
+    digitalWrite(motors.pinout.dir2_pin, direction?LOW:HIGH);
+    motors.move(direction, m_steps);
 }
 
 void RobotCoupe::rotate (int direction, float angle){
@@ -45,9 +44,10 @@ void RobotCoupe::rotate (int direction, float angle){
      * direction :  0 for left rotation (anti-clockwise)
      *              1 for right rotation (clockwise) */
     float distance = angle * _baseWidth / 360.;
-    long m_steps = motors[0].param.step_mode * 200 * distance / (2. * _wheelRadius);
-    motors[0].move(direction, m_steps);
-    motors[1].move(direction, m_steps);
+    long m_steps = motors.param.step_mode * 200 * distance / (2. * _wheelRadius);
+    digitalWrite(motors.pinout.dir1_pin, direction?LOW:HIGH);
+    digitalWrite(motors.pinout.dir2_pin, direction?LOW:HIGH);
+    motors.move(direction, m_steps);
 }
 
 

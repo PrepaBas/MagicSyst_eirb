@@ -23,7 +23,7 @@ class RobotCoupe {
   RobotCoupe(float baseWidth, float wheelRadius);
 
   // stepper motors instanciation
-  StepperMotor motors[2];
+  StepperMotor motors;
 
   int normal_speed = 300;
   int low_speed = 50;
