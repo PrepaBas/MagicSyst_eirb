@@ -6,23 +6,22 @@
 // put function declarations here:
 
 RobotCoupe robot(263, 72/2);
-
 void setup() {
-  delay(5000);
-  robot.motors.pinout = {0, 2, 1, 5, 6, 10, 11, 7};
+  delay(1000);
+  Serial.begin(115200);
+  robot.motors.pinout = {12, 32, 13, 33, 25, 26, 27, 14};
   robot.motors.begin();
   digitalWrite(robot.motors.pinout.ms1_pin, HIGH);
   digitalWrite(robot.motors.pinout.ms2_pin, HIGH);
-  digitalWrite(robot.motors.pinout.sleep_pin, LOW);
   robot.set_x(300);
   robot.set_y(300);
 }
 
 void loop(){
-
-  robot.follow_to({1000, 2651});
-  delay(500);
-  robot.follow_to({300, 300});
-  while(1){}
+  delay(1000);
+  //robot.move_straight(1, 100);
+  //robot.move_straight(0, 5);
+  robot.follow_to({1000, 1657});
+  while(1){delay(100);}
 
 }
