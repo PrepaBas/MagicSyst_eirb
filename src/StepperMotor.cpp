@@ -21,7 +21,7 @@ void StepperMotor::begin(){
 
 void StepperMotor::move(uint8_t dir, uint32_t steps){
     // digitalWrite(StepperMotor::pinout.dir_pin, dir?HIGH:LOW);
-    unsigned long speed_timer = 0; // defines frequency at wich the step_pin is activated to generate shaft speed
+    unsigned long speed_timer = 1; // defines frequency at wich the step_pin is activated to generate shaft speed
 
 
     /* search nuber of steps during acceleration phase */
@@ -40,13 +40,14 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         
 
         /* start of acceleration */
+        Serial.print("Acceleration\n");
         while(n < steps_acc){
             t2 = micros();
-            if(speed_timer <= t2-t1 || n == 0){ // waiting speed_timer time to elapse. First step is forced throught second condition
+            if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
                 digitalWrite(StepperMotor::pinout.step1_pin, HIGH);
                 digitalWrite(StepperMotor::pinout.step2_pin, HIGH);
-                speed_timer = inv_acc / ((t2 - t0)); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v
-                if(speed_timer >10000) speed_timer = 10000;
+                speed_timer = inv_acc / (t2 - t0); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v
+                if(speed_timer >1000) speed_timer = 1000;
                 n++;
                 t1 = t2;
                 digitalWrite(StepperMotor::pinout.step1_pin, LOW); // timing of low-pull on step_pin is not critical
@@ -54,6 +55,7 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
             }
         }
         /* end of acceleration */
+        Serial.print("Cruise\n");
         /* begining of cruise */
         speed_timer = 1000000/StepperMotor::param.max_speed;//./StepperMotor::param.max_speed; // timer for speed is constant
         while(n < steps-steps_dec){
@@ -69,20 +71,15 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         }
         /* end of cruise */
         /* begining of deceleration */
+        Serial.print("Deceleration\n");
         t0=micros(); // reset time for ease of calculation
         while(n < steps){
             t2 = micros();
             if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
                 digitalWrite(StepperMotor::pinout.step1_pin, HIGH);
                 digitalWrite(StepperMotor::pinout.step2_pin, HIGH);
-                long int denominator = StepperMotor::param.max_speed*1000000-StepperMotor::param.deceleration*(t2-t0);
-                Serial.print(denominator); Serial.print("\n");
-                if(denominator >0){
-                    speed_timer = 1000000000000/(denominator); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v
-                }
-                else{
-                    speed_timer = 1000;
-                }
+                speed_timer = 1000000000000/(StepperMotor::param.max_speed*1000000-StepperMotor::param.deceleration*(t2-t0)); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v  
+                if(speed_timer>1000) speed_timer = 1000;
                 n++; 
                 t1 = t2;
                 digitalWrite(StepperMotor::pinout.step1_pin, LOW); // timing of low-pull on step_pin is not critical
@@ -96,9 +93,10 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         unsigned long t0 = micros(); // start time since begining of movement
         unsigned long top_timer;
         /* acceleration loop */
+        Serial.print("Short acceleration\n");
         while(n < steps){ // loop will break before n>=steps
             t2 = micros();
-            if(speed_timer <= t2-t1 || n == 0){ // waiting speed_timer time to elapse. First step is forced throught second condition
+            if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
                 digitalWrite(StepperMotor::pinout.step1_pin, HIGH);
                 digitalWrite(StepperMotor::pinout.step2_pin, HIGH);
                 speed_timer = inv_acc/(t2-t0); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v
@@ -115,7 +113,7 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
     
             }
         }
-
+        Serial.print("short Deceleration\n");
         t0 = micros(); // start time since begining of deceleration
         /* deceleration loop */
         while(n<steps){

@@ -43,7 +43,7 @@ typedef struct {
 
 class StepperMotor {
     public:
-    stepper_parameters_t param = {1000, 5000, 5000, STEP_MODE_SIXTEENTH};
+    stepper_parameters_t param = {10000, 8000, 8000, STEP_MODE_SIXTEENTH};
     stepper_pinout_t pinout;
     StepperMotor();
     void begin();

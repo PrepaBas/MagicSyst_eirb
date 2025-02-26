@@ -45,8 +45,8 @@ void RobotCoupe::rotate (int direction, float angle){
      *              1 for right rotation (clockwise) */
     float distance = angle * _baseWidth / 360.;
     long m_steps = motors.param.step_mode * 200 * distance / (2. * _wheelRadius);
-    digitalWrite(motors.pinout.dir1_pin, direction?LOW:HIGH);
-    digitalWrite(motors.pinout.dir2_pin, direction?LOW:HIGH);
+    digitalWrite(motors.pinout.dir2_pin, direction?HIGH:LOW);
+    digitalWrite(motors.pinout.dir1_pin, direction?HIGH:LOW);
     motors.move(direction, m_steps);
 }
 
@@ -160,10 +160,7 @@ int what_zone (struct position pos) {
 void RobotCoupe::follow_to(struct position pos){
     /* Zones finding */
     int start_zone = what_zone(_position);
-    Serial.print("\n*** Start zone is "); Serial.print(start_zone); Serial.print(" *** \n");
     int end_zone = what_zone(pos);
-    Serial.print("\n*** End zone is "); Serial.print(end_zone); Serial.print(" *** \n");
-
 
     /* Place robot to nearest point in circulation path*/
     if(start_zone== 0){
@@ -195,7 +192,6 @@ void RobotCoupe::follow_to(struct position pos){
         RobotCoupe::go_to(destination);
     }
     /* Robot is now on circulation path */
-
     /* Path rotation direction finding*/
     // Imaginary line crossing starting position and center of stage
     float a = (_position.y - table_coupe.extreme.y/2)/(_position.x - table_coupe.extreme.x/2);
@@ -220,7 +216,6 @@ void RobotCoupe::follow_to(struct position pos){
         }
     }
     /* rotation direction found */
-    
     /* circulating robot following circulation path */
     int x_zone = start_zone;
     while(x_zone != end_zone){
@@ -231,7 +226,6 @@ void RobotCoupe::follow_to(struct position pos){
         }
      }
     /* Robot stopped at nearest corner from desired zone */
-
     /* last movement is to go to end position*/
     if(end_zone== 0){
         RobotCoupe::go_to(pos);
