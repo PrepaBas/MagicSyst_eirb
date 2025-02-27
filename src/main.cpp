@@ -21,9 +21,7 @@ void setup() {
 
 void loop(){
   delay(1000);
-  Serial.print("Machtu Pichtou");
-  //robot.move_straight(1, 100);
-  //robot.move_straight(0, 5);
+  robot.disable_steppers();
   robot.follow_to({600, 1657});
   
   robot.follow_to({300, 300});

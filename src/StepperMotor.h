@@ -17,13 +17,16 @@ typedef enum {
 
 /**
  * @brief stepper parameters
+ * @param max_speed
+ * @param acceleration
+ * @param deceleration
+ * @param step_mode
  */
 typedef struct {
     float max_speed;    // motor max speed [step/second]
     float acceleration; // moror acceleration [step/seconde^2]
     float deceleration;  // motor deceleration [step/second^2]
     step_mode_t step_mode;   // motor step mode
-
 } stepper_parameters_t;
 
 /**
@@ -37,7 +40,7 @@ typedef struct {
     uint8_t ms1_pin;       // microstepping pin
     uint8_t ms2_pin;       // microstepping pin
     uint8_t ms3_pin;       // microstepping pin
-   uint8_t en_pin;        // reset pin, pull low to disable step pin and force motor to reset position
+    uint8_t en_pin;        // reset pin, pull low to disable step pin and force motor to reset position
 } stepper_pinout_t;
 
 
@@ -48,6 +51,8 @@ class StepperMotor {
     StepperMotor();
     void begin();
     void move(uint8_t dir, uint32_t steps);
+    void disable_steppers();
+    void enable_steppers();
 };
 
 #endif
