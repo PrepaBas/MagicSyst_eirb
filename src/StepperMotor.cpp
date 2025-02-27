@@ -112,6 +112,7 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         unsigned long t0 = micros(); // start time since begining of movement
         unsigned long top_timer;
         /* acceleration loop */
+        delayMicroseconds(10);
         while(n < steps){ // loop will break before n>=steps
             t2 = micros();
             if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
