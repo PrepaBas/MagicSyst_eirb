@@ -40,7 +40,6 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         
 
         /* start of acceleration */
-        Serial.print("Acceleration\n");
         while(n < steps_acc){
             t2 = micros();
             if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
@@ -55,7 +54,6 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
             }
         }
         /* end of acceleration */
-        Serial.print("Cruise\n");
         /* begining of cruise */
         speed_timer = 1000000/StepperMotor::param.max_speed;//./StepperMotor::param.max_speed; // timer for speed is constant
         while(n < steps-steps_dec){
@@ -71,7 +69,6 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         }
         /* end of cruise */
         /* begining of deceleration */
-        Serial.print("Deceleration\n");
         t0=micros(); // reset time for ease of calculation
         while(n < steps){
             t2 = micros();
@@ -93,7 +90,7 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         unsigned long t0 = micros(); // start time since begining of movement
         unsigned long top_timer;
         /* acceleration loop */
-        Serial.print("Short acceleration\n");
+        delayMicroseconds(10);
         while(n < steps){ // loop will break before n>=steps
             t2 = micros();
             if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
@@ -113,7 +110,6 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
     
             }
         }
-        Serial.print("short Deceleration\n");
         t0 = micros(); // start time since begining of deceleration
         /* deceleration loop */
         while(n<steps){
