@@ -3,12 +3,9 @@
 
 #include "Arduino.h"
 #include "StepperMotor.h"
+#include "table.h"
 
-struct position {
-    float x;
-    float y;
-    float theta;
-};
+//extern table table_coupe;
 
 class RobotCoupe {
   // Attributs : private par defaut
@@ -24,9 +21,6 @@ class RobotCoupe {
 
   // stepper motors instanciation
   StepperMotor motors;
-
-  int normal_speed = 300;
-  int low_speed = 50;
 
   // Begin 
   void begin();

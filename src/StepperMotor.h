@@ -43,7 +43,9 @@ typedef struct {
     uint8_t en_pin;        // reset pin, pull low to disable step pin and force motor to reset position
 } stepper_pinout_t;
 
-
+/**
+ * @brief class to make 2 stepper motors turn simultaniously
+ */
 class StepperMotor {
     public:
     stepper_parameters_t param = {10000, 8000, 8000, STEP_MODE_SIXTEENTH};

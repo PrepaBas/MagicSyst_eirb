@@ -2,6 +2,7 @@
 #include <time.h>
 #include "StepperMotor.h"
 #include "advanced_movement.h"
+#include "table.h"
 
 // put function declarations here:
 
@@ -21,7 +22,7 @@ void setup() {
 
 void loop(){
   delay(1000);
-  robot.disable_steppers();
+  robot.motors.enable_steppers();
   robot.follow_to({600, 1657});
   
   robot.follow_to({300, 300});

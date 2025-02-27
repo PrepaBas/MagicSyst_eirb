@@ -7,6 +7,9 @@
 #include "advanced_movement.h"
 #include "StepperMotor.h"
 
+table table_coupe = {{650, 670}, {650, 1300}, {2340, 670}, {2340, 1300}, {3000, 2000}};
+
+
 /* ---------------------------------------------------------------------*/
 RobotCoupe::RobotCoupe(float baseWidth, float wheelRadius){
     _baseWidth = baseWidth;
@@ -34,8 +37,8 @@ void RobotCoupe::move_straight (char direction, float distance){
      * direction :  1 for Forward
      *              0 for Backward */
     long m_steps = motors.param.step_mode * 200 * distance / (2. * PI * _wheelRadius); // Implicit conversion
-    digitalWrite(motors.pinout.dir1_pin, direction?HIGH:LOW);
-    digitalWrite(motors.pinout.dir2_pin, direction?LOW:HIGH);
+    digitalWrite(motors.pinout.dir2_pin, direction?HIGH:LOW);
+    digitalWrite(motors.pinout.dir1_pin, direction?LOW:HIGH);
     motors.move(direction, m_steps);
 }
 
@@ -91,17 +94,6 @@ void RobotCoupe::go_to(struct position pos){
     
 }
 
-struct table {
-    struct position bl;
-    struct position tl;
-    struct position br;
-    struct position tr;
-    struct position extreme;
-};
-
-
-table table_coupe = {{650, 670}, {650, 1300}, {2340, 670}, {2340, 1300}, {3000, 2000}};
-
 position corner_positon(int c){
     switch(c){
         case 0 :
@@ -111,6 +103,8 @@ position corner_positon(int c){
         case 4 :
             return table_coupe.tr;
         case 6 :
+            return table_coupe.tl;
+        default :
             return table_coupe.tl;
     }
 }
