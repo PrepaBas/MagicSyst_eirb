@@ -47,7 +47,7 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
 
 
     /* search nuber of steps during acceleration phase */
-    uint64_t inv_acc = 1000000000000./StepperMotor::param.acceleration;
+    float inv_acc = 1000000000000./StepperMotor::param.acceleration;
     uint64_t steps_acc = 0.5*StepperMotor::param.max_speed*StepperMotor::param.max_speed/StepperMotor::param.acceleration;
     uint64_t steps_dec = 0.5*StepperMotor::param.max_speed*StepperMotor::param.max_speed/StepperMotor::param.deceleration;
     
@@ -112,7 +112,7 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         unsigned long t0 = micros(); // start time since begining of movement
         unsigned long top_timer;
         /* acceleration loop */
-        delayMicroseconds(10);
+        delayMicroseconds(1000);
         while(n < steps){ // loop will break before n>=steps
             t2 = micros();
             if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition

@@ -3,10 +3,11 @@
 #include "StepperMotor.h"
 #include "advanced_movement.h"
 #include "table.h"
+#include "basic_strat.h"
 
 // put function declarations here:
 
-RobotCoupe robot(263, 72/2);
+RobotCoupe robot(263.4, 72.5/2);
 void setup() {
   delay(1000);
   Serial.begin(115200);
@@ -15,17 +16,14 @@ void setup() {
   digitalWrite(robot.motors.pinout.ms1_pin, HIGH);
   digitalWrite(robot.motors.pinout.ms2_pin, HIGH);
   digitalWrite(robot.motors.pinout.ms3_pin, HIGH);
-  robot.set_x(300);
-  robot.set_y(300);
-  robot.set_theta(0);
+  
 }
 
 void loop(){
-  delay(1000);
   robot.motors.enable_steppers();
-  robot.follow_to({600, 1657});
-  
-  robot.follow_to({300, 300});
+  robot.motors.param.max_speed = 8000;
+  delay(5000);
+  function1();
   while(1){delay(100);}
 
 }

@@ -94,6 +94,23 @@ void RobotCoupe::go_to(struct position pos){
     
 }
 
+void RobotCoupe::go_to_reverse(struct position pos){
+    /* Move robot to coordinates.
+     * First rotate then move in straight line */
+    
+    float x = pos.x - _position.x;
+    float y = pos.y - _position.y;
+    float radius = sqrt(x*x+y*y);
+    float angle = atan2(y, x)*360/(2 * PI);
+    RobotCoupe::angle_to(angle+180);
+    RobotCoupe::move_straight(1, radius);
+
+    // Update new position
+    RobotCoupe::set_x(pos.x);
+    RobotCoupe::set_y(pos.y);
+    
+}
+
 position corner_positon(int c){
     switch(c){
         case 0 :

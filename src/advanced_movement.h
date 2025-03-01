@@ -35,6 +35,7 @@ class RobotCoupe {
   void rotate (int direction, float angle);
   void angle_to(float angle);
   void go_to(struct position pos);
+  void go_to_reverse(struct position pos);
   void follow_to(struct position pos);
 };
 
