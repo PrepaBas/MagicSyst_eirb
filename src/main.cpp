@@ -16,14 +16,17 @@ void setup() {
   digitalWrite(robot.motors.pinout.ms1_pin, HIGH);
   digitalWrite(robot.motors.pinout.ms2_pin, HIGH);
   digitalWrite(robot.motors.pinout.ms3_pin, HIGH);
-  
+ 
+  robot.set_x(100);
+  robot.set_y(865);
+  robot.set_theta(0);
 }
 
 void loop(){
   robot.motors.enable_steppers();
   robot.motors.param.max_speed = 8000;
   delay(5000);
-  function1();
+  function2();
   while(1){delay(100);}
 
 }

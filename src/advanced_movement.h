@@ -37,6 +37,7 @@ class RobotCoupe {
   void go_to(struct position pos);
   void go_to_reverse(struct position pos);
   void follow_to(struct position pos);
+  void anti_follow_to(struct position pos);
 };
 
 

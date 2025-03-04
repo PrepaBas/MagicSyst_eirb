@@ -34,5 +34,40 @@ void function1(){
 
 }
 
+void function2(){
+    /* init */
+    robot.motors.enable_steppers();
+    robot.motors.param.max_speed=HIGH_SPEED;
+    delay(200);
+    robot.set_x(100);
+    robot.set_y(865);
+    robot.set_theta(0);
+
+    /* go to cans */
+    robot.follow_to({775, 570});
+
+    /* contact cans */
+    robot.motors.param.max_speed=LOW_SPEED;
+    robot.go_to({775, 328});
+    delay(100);
+    robot.go_to_reverse({775, 500}); 
+    
+    /* go to deposit location */
+    robot.motors.param.max_speed=HIGH_SPEED;
+    robot.anti_follow_to({250, 300});
+
+    /* deposit cans */
+    robot.motors.param.max_speed=LOW_SPEED;
+    robot.go_to({250, 240});
+    robot.go_to_reverse({250, 400});
+    
+    /* return to starting point*/
+    robot.motors.param.max_speed=HIGH_SPEED;
+    robot.follow_to({200, 865});
+    robot.go_to_reverse({100, 865});
+    delay(500);
+    robot.motors.disable_steppers();
+
+}
 
 #endif
