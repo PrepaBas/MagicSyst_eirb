@@ -16,6 +16,16 @@ typedef enum {
 } step_mode_t;
 
 /**
+ * @brief different types of movement
+ */
+typedef enum {
+    STRAIGHT_FORWARD=0;
+    STRAIGHT_BACKWARD;
+    ROTATE_RIGHT;
+    ROTATE_LEFT
+} move_type_t
+
+/**
  * @brief stepper parameters
  * @param max_speed
  * @param acceleration
@@ -24,6 +34,7 @@ typedef enum {
  */
 typedef struct {
     float max_speed;    // motor max speed [step/second]
+    float min_speed;
     float acceleration; // moror acceleration [step/seconde^2]
     float deceleration;  // motor deceleration [step/second^2]
     step_mode_t step_mode;   // motor step mode
@@ -48,8 +59,10 @@ typedef struct {
  */
 class StepperMotor {
     public:
-    stepper_parameters_t param = {10000, 8000, 8000, STEP_MODE_SIXTEENTH};
+    stepper_parameters_t param = {10000, 1000, 8000, 8000, STEP_MODE_SIXTEENTH};
     stepper_pinout_t pinout;
+    unsigned long current_speed = 0; // [Steps/sec]
+    uint32_t remaining_steps = 0;
     StepperMotor();
     void begin();
     void move(uint8_t dir, uint32_t steps);

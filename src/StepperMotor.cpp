@@ -149,3 +149,24 @@ void StepperMotor::move(uint8_t dir, uint32_t steps){
         }
     }
 }
+
+void StepperMotor::deceleration(float initial_speed; float target_speed){
+    while()
+}
+
+/**
+ * @brief turn motors up to stop following movement type and number of steps. max_speed speed can be changed midway
+ * Calculation at constant acceleration/deceleration (similar to free-fall)
+ */
+void StepperMotor::move(move_type_t move_type, uint32_t total_steps){
+    StepperMotor::remaining_steps = total_steps;
+    while(StepperMotor::remaining_steps){
+        uint32_t steps_dec = 0.5*StepperMotor::current_speed*StepperMotor::param.max_speed/StepperMotor::param.deceleration; // steps required idealy for complete stop at current speed
+        if(StepperMotor::current_speed > StepperMotor::param.max_speed){
+
+        }
+        else if(steps_dec < StepperMotor::remaining_steps){ // 
+
+        }
+    }
+}

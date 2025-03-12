@@ -26,28 +26,29 @@ void setup() {
 }
 
 void Task1code(void* parameters){
-  uint32_t* param = (uint32_t*) parameters;
-  while(1){
-    delay(100);
-    Serial.print("change danger\n");
-    *param+=1;
-    Serial.print("changed\n");
+  robot.motors.enable_steppers();
+  robot.motors.param.max_speed = 8000;
+  vTaskDelay(pdMS_TO_TICKS(5000));
+  deposit_bl_cans();
+  while(1){}
+}
+
+void Task2code(void* parameters){
+  int i=0;
+  for(;;){
+    Serial.print(i++);
+    Serial.print("\n");
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
 }
 
 void loop(){
-  uint32_t* danger = (uint32_t*) malloc(sizeof(uint32_t));
-  xTaskCreatePinnedToCore(Task1code, "Task1", 10000, danger, 2, &Task1, 0);         
-  delay(500);
-  for(;;){
-    Serial.print("On core 1 : ");
-    Serial.print(*danger);
-    Serial.print("\n");
-    delay(100);
-  }
+  
+  xTaskCreatePinnedToCore(Task1code, "Task1", 10000, NULL, 2, &Task1, 1);   
+  xTaskCreatePinnedToCore(Task2code, "Task2", 10000, NULL, 2, &Task1, 1);       
+  while(1){}
   robot.motors.enable_steppers();
   robot.motors.param.max_speed = 8000;
-  delay(5000);
   deposit_bl_cans();
   deposit_tl_cans();
   go_home();
