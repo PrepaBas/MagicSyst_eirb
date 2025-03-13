@@ -19,11 +19,11 @@ typedef enum {
  * @brief different types of movement
  */
 typedef enum {
-    STRAIGHT_FORWARD=0;
-    STRAIGHT_BACKWARD;
-    ROTATE_RIGHT;
-    ROTATE_LEFT
-} move_type_t
+    STRAIGHT_FORWARD=0,
+    STRAIGHT_BACKWARD,
+    ROTATE_RIGHT,
+    ROTATE_LEFT,
+} move_type_t;
 
 /**
  * @brief stepper parameters
@@ -61,11 +61,12 @@ class StepperMotor {
     public:
     stepper_parameters_t param = {10000, 1000, 8000, 8000, STEP_MODE_SIXTEENTH};
     stepper_pinout_t pinout;
-    unsigned long current_speed = 0; // [Steps/sec]
+    float current_speed = 0; // [Steps/sec]
     uint32_t remaining_steps = 0;
     StepperMotor();
     void begin();
-    void move(uint8_t dir, uint32_t steps);
+    void move(uint32_t steps);
+    void move_task();
     void disable_steppers();
     void enable_steppers();
 };

@@ -6,6 +6,7 @@
 #include "basic_strat.h"
 
 TaskHandle_t Task1;
+TaskHandle_t moveTask;
 
 
 
@@ -25,12 +26,14 @@ void setup() {
 
 }
 
-void Task1code(void* parameters){
+void moveTaskcode(void* parameters){
+  vTaskDelay(pdMS_TO_TICKS(5000));
+  robot.motors.remaining_steps=0;
+  robot.motors.current_speed=0;
   robot.motors.enable_steppers();
   robot.motors.param.max_speed = 8000;
   vTaskDelay(pdMS_TO_TICKS(5000));
-  deposit_bl_cans();
-  while(1){}
+  robot.motors.move_task();
 }
 
 void Task2code(void* parameters){
@@ -44,8 +47,12 @@ void Task2code(void* parameters){
 
 void loop(){
   
-  xTaskCreatePinnedToCore(Task1code, "Task1", 10000, NULL, 2, &Task1, 1);   
-  xTaskCreatePinnedToCore(Task2code, "Task2", 10000, NULL, 2, &Task1, 1);       
+  xTaskCreate(moveTaskcode, "moveTask", 10000, NULL, 2, &moveTask);   
+  xTaskCreate(Task2code, "Task2", 10000, NULL, 2, &Task1);      
+  vTaskDelay(pdMS_TO_TICKS(5000));
+  robot.move_straight(1, 1000);
+  //deposit_bl_cans();
+  //deposit_tl_cans();
   while(1){}
   robot.motors.enable_steppers();
   robot.motors.param.max_speed = 8000;
