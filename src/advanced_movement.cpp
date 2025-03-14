@@ -39,7 +39,8 @@ void RobotCoupe::move_straight (char direction, float distance){
     long m_steps = motors.param.step_mode * 200 * distance / (2. * PI * _wheelRadius); // Implicit conversion
     digitalWrite(motors.pinout.dir2_pin, direction?HIGH:LOW);
     digitalWrite(motors.pinout.dir1_pin, direction?LOW:HIGH);
-    motors.move(direction, m_steps);
+    RobotCoupe::motors.remaining_steps = m_steps;
+    while(RobotCoupe::motors.remaining_steps){Serial.println("moving_straight");}
 }
 
 void RobotCoupe::rotate (int direction, float angle){
@@ -50,7 +51,8 @@ void RobotCoupe::rotate (int direction, float angle){
     long m_steps = motors.param.step_mode * 200 * distance / (2. * _wheelRadius);
     digitalWrite(motors.pinout.dir2_pin, direction?HIGH:LOW);
     digitalWrite(motors.pinout.dir1_pin, direction?HIGH:LOW);
-    motors.move(direction, m_steps);
+    RobotCoupe::motors.remaining_steps = m_steps;
+    while(RobotCoupe::motors.remaining_steps){Serial.println("rotating");}
 }
 
 
