@@ -156,65 +156,59 @@ void StepperMotor::move(uint32_t steps){
  * @brief turn motors up to stop following movement type and number of steps. max_speed speed can be changed midway
  * Calculation at constant acceleration/deceleration (similar to free-fall)
  */
-void StepperMotor::move_task(){
+void StepperMotor::move_task(uint64_t* t0, uint64_t* t1){
     
     /* Initialisation of variables */  
-    uint32_t steps_dec = 0.5*StepperMotor::current_speed*StepperMotor::param.max_speed/StepperMotor::param.deceleration; // steps required idealy for complete stop at current speed      
-    int64_t t1; // after calculation
-    int64_t t0 = esp_timer_get_time();; // time before calculation
+    uint32_t steps_dec=0.5*StepperMotor::current_speed*StepperMotor::current_speed /StepperMotor::param.deceleration; // steps required idealy for complete stop at current speed
+        
+    if(StepperMotor::remaining_steps > 0){
 
-    for(;;){ // loop task
-        if(StepperMotor::remaining_steps > 0){
+        /* remaining_steps allow for later deceleration */
+        if(StepperMotor::remaining_steps > steps_dec){
 
-            /* remaining_steps allow for later deceleration */
-            if(StepperMotor::remaining_steps > steps_dec){
-
-                /* current_speed is inferior to max_speed -> acceleration */
-                if(StepperMotor::current_speed < StepperMotor::param.max_speed*0.99){
-                    if(StepperMotor::current_speed < StepperMotor::param.min_speed){
-                        StepperMotor::current_speed = StepperMotor::param.min_speed;
-                    }
-                    else{
-                        StepperMotor::current_speed = StepperMotor::param.acceleration/StepperMotor::current_speed+StepperMotor::current_speed; // v_{n+1}=a*t+v_n avec t=1/v
-                        if(StepperMotor::current_speed > StepperMotor::param.max_speed){
-                            StepperMotor::current_speed = StepperMotor::param.max_speed;
-                        }
-                    }
-                }
-
-                /* current_speed is superior to max_speed -> deceleration */
-                else if(StepperMotor::current_speed > 1.01* StepperMotor::param.max_speed){
-                    StepperMotor::current_speed = -StepperMotor::param.deceleration/StepperMotor::current_speed+StepperMotor::current_speed; // v_{n+1}=a*t+v_n avec t=1/v
-                    if(StepperMotor::current_speed < StepperMotor::param.max_speed){
-                        StepperMotor::current_speed = StepperMotor::param.max_speed;
-                    }  
-                }
-
-                /* current_speed is max_speed */
-                else{
-                    StepperMotor::current_speed = StepperMotor::param.max_speed;
-                }
-            }
-
-            /* Remaining steps only allow for deceleration */
-            else{
-                StepperMotor::current_speed = (StepperMotor::param.min_speed - StepperMotor::current_speed)/StepperMotor::remaining_steps + StepperMotor::current_speed;
+            /* current_speed is inferior to max_speed -> acceleration */
+            if(StepperMotor::current_speed < StepperMotor::param.max_speed*0.99){
                 if(StepperMotor::current_speed < StepperMotor::param.min_speed){
                     StepperMotor::current_speed = StepperMotor::param.min_speed;
                 }
-
+                else{
+                    StepperMotor::current_speed = StepperMotor::param.acceleration/StepperMotor::current_speed+StepperMotor::current_speed; // v_{n+1}=a*t+v_n avec t=1/v
+                    if(StepperMotor::current_speed > StepperMotor::param.max_speed){
+                        StepperMotor::current_speed = StepperMotor::param.max_speed;
+                    }
+                }
             }
-            uint64_t waiting_time = 1000000./StepperMotor::current_speed;
-            steps_dec=0.5*StepperMotor::current_speed*StepperMotor::param.max_speed/StepperMotor::param.deceleration; // steps required idealy for complete stop at current speed
-            digitalWrite(StepperMotor::pinout.step1_pin, LOW);
-            digitalWrite(StepperMotor::pinout.step2_pin, LOW);
-            while(t1-t0 < waiting_time){t1=esp_timer_get_time();} // delay for waiting_time
-            digitalWrite(StepperMotor::pinout.step1_pin, HIGH);
-            digitalWrite(StepperMotor::pinout.step2_pin, HIGH);
-            StepperMotor::remaining_steps-=1;
-            t0 = t1;
-            steps_dec = 0.5*StepperMotor::current_speed*StepperMotor::param.max_speed/StepperMotor::param.deceleration; // steps required idealy for complete stop at current speed
-            
+
+            /* current_speed is superior to max_speed -> deceleration */
+            else if(StepperMotor::current_speed > 1.01* StepperMotor::param.max_speed){
+                StepperMotor::current_speed = -StepperMotor::param.deceleration/StepperMotor::current_speed+StepperMotor::current_speed; // v_{n+1}=a*t+v_n avec t=1/v
+                if(StepperMotor::current_speed < StepperMotor::param.max_speed){
+                    StepperMotor::current_speed = StepperMotor::param.max_speed;
+                }  
+            }
+
+            /* current_speed is max_speed */
+            else{
+                StepperMotor::current_speed = StepperMotor::param.max_speed;
+            }
         }
-    }
+
+        /* Remaining steps only allow for deceleration */
+        else{
+            StepperMotor::current_speed = (StepperMotor::param.min_speed - StepperMotor::current_speed)/(StepperMotor::remaining_steps) + StepperMotor::current_speed;
+            if(StepperMotor::current_speed < StepperMotor::param.min_speed){
+                StepperMotor::current_speed = StepperMotor::param.min_speed;
+            }
+
+        }
+        uint64_t waiting_time = 1000000./StepperMotor::current_speed;
+        digitalWrite(StepperMotor::pinout.step1_pin, LOW);
+        digitalWrite(StepperMotor::pinout.step2_pin, LOW);
+        while(*t1-*t0 < waiting_time){*t1=esp_timer_get_time();} // delay for waiting_time
+        digitalWrite(StepperMotor::pinout.step1_pin, HIGH);
+        digitalWrite(StepperMotor::pinout.step2_pin, HIGH);
+        StepperMotor::remaining_steps-=1;
+        *t0 = *t1;
+    } 
+    else Serial.println("no steps");
 }

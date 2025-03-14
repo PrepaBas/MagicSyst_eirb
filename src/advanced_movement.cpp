@@ -40,7 +40,7 @@ void RobotCoupe::move_straight (char direction, float distance){
     digitalWrite(motors.pinout.dir2_pin, direction?HIGH:LOW);
     digitalWrite(motors.pinout.dir1_pin, direction?LOW:HIGH);
     RobotCoupe::motors.remaining_steps = m_steps;
-    while(!RobotCoupe::motors.remaining_steps){}
+    while(RobotCoupe::motors.remaining_steps){Serial.println("moving_straight");}
 }
 
 void RobotCoupe::rotate (int direction, float angle){
@@ -52,7 +52,7 @@ void RobotCoupe::rotate (int direction, float angle){
     digitalWrite(motors.pinout.dir2_pin, direction?HIGH:LOW);
     digitalWrite(motors.pinout.dir1_pin, direction?HIGH:LOW);
     RobotCoupe::motors.remaining_steps = m_steps;
-    while(!RobotCoupe::motors.remaining_steps){}
+    while(RobotCoupe::motors.remaining_steps){Serial.println("rotating");}
 }
 
 

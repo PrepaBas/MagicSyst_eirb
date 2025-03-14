@@ -66,7 +66,7 @@ class StepperMotor {
     StepperMotor();
     void begin();
     void move(uint32_t steps);
-    void move_task();
+    void move_task(uint64_t* t0, uint64_t* t1);
     void disable_steppers();
     void enable_steppers();
 };
