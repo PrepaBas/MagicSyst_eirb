@@ -15,15 +15,6 @@ typedef enum {
     STEP_MODE_SIXTEENTH = 16,
 } step_mode_t;
 
-/**
- * @brief different types of movement
- */
-typedef enum {
-    STRAIGHT_FORWARD=0,
-    STRAIGHT_BACKWARD,
-    ROTATE_RIGHT,
-    ROTATE_LEFT,
-} move_type_t;
 
 /**
  * @brief stepper parameters
@@ -59,16 +50,17 @@ typedef struct {
  */
 class StepperMotor {
     public:
-    stepper_parameters_t param = {10000, 1000, 8000, 8000, STEP_MODE_SIXTEENTH};
+    stepper_parameters_t param = {15000, 500, 7000, 11000, STEP_MODE_SIXTEENTH};
     stepper_pinout_t pinout;
     float current_speed = 0; // [Steps/sec]
     uint32_t remaining_steps = 0;
     StepperMotor();
     void begin();
     void move(uint32_t steps);
-    void move_task(uint64_t* t0, uint64_t* t1);
+    int move_task(uint64_t* t0, uint64_t* t1);
     void disable_steppers();
     void enable_steppers();
+    
 };
 
 #endif

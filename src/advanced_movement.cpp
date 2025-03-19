@@ -9,13 +9,11 @@
 
 table table_coupe = {{650, 670}, {650, 1300}, {2340, 670}, {2340, 1300}, {3000, 2000}};
 
-
 /* ---------------------------------------------------------------------*/
 RobotCoupe::RobotCoupe(float baseWidth, float wheelRadius){
     _baseWidth = baseWidth;
     _wheelRadius = wheelRadius;
     motors.begin();
-    
 }
 
 /* Setters and Getters -------------------------------------------------------*/
@@ -32,27 +30,75 @@ void RobotCoupe::set_theta(float theta){
     _position.theta = theta;
 }
 
+
+uint64_t distance_to_steps(float distance, float radius ,uint16_t steps_per_revolution){
+    uint64_t steps = steps_per_revolution * distance / (2. * PI * radius);
+    return steps;
+}
+
+float steps_to_distance(uint64_t steps, float radius, uint16_t steps_per_revolution){
+    float d = steps*2*PI*radius/steps_per_revolution;
+    return d;
+}
+float restrict_angle(float in_angle){
+    float out_angle = in_angle;
+    while(out_angle > 180){
+        out_angle += -360;
+    }
+    while(out_angle < -180){
+        out_angle += 360;
+    }
+    return out_angle;
+}
+
+void RobotCoupe::new_position(){
+    /* update position using movement type and steps difference */
+    float d = steps_to_distance(steps_done, _wheelRadius, 200*RobotCoupe::motors.param.step_mode);
+    switch(_last_move_type){
+        case STRAIGHT_FORWARD:
+            RobotCoupe::set_x(_position.x + d*cos(_position.theta*PI/180));
+            RobotCoupe::set_y(_position.y + d*sin(_position.theta*PI/180));
+            break;
+        case STRAIGHT_BACKWARD:
+            RobotCoupe::set_x(_position.x - d*cos(_position.theta*PI/180));
+            RobotCoupe::set_y(_position.y - d*sin(_position.theta*PI/180)); 
+            break;
+        case ROTATE_RIGHT:
+            RobotCoupe::set_theta(restrict_angle(_position.theta + d*360/(PI*_baseWidth)));
+            break;
+        case ROTATE_LEFT:
+            RobotCoupe::set_theta(restrict_angle(_position.theta - d*360/(PI*_baseWidth)));
+            break;
+    }
+}
+
 void RobotCoupe::move_straight (char direction, float distance){
     /* Move robot in a straight line
      * direction :  1 for Forward
      *              0 for Backward */
-    long m_steps = motors.param.step_mode * 200 * distance / (2. * PI * _wheelRadius); // Implicit conversion
+    uint64_t m_steps =  distance_to_steps(distance, _wheelRadius, 200*RobotCoupe::motors.param.step_mode);
     digitalWrite(motors.pinout.dir2_pin, direction?HIGH:LOW);
     digitalWrite(motors.pinout.dir1_pin, direction?LOW:HIGH);
+    steps_done = 0;
     RobotCoupe::motors.remaining_steps = m_steps;
-    while(RobotCoupe::motors.remaining_steps){Serial.println("moving_straight");}
+    _last_move_type = direction?STRAIGHT_BACKWARD:STRAIGHT_FORWARD;
+    while(RobotCoupe::motors.remaining_steps){vTaskDelay(pdMS_TO_TICKS(10));}
+    RobotCoupe::new_position(); // update postion    
 }
 
 void RobotCoupe::rotate (int direction, float angle){
     /* Rotate robot in place
      * direction :  0 for left rotation (anti-clockwise)
      *              1 for right rotation (clockwise) */
-    float distance = angle * _baseWidth / 360.;
-    long m_steps = motors.param.step_mode * 200 * distance / (2. * _wheelRadius);
+    float distance = angle * _baseWidth * PI / 360.;
+    uint64_t m_steps =  distance_to_steps(distance, _wheelRadius, 200*RobotCoupe::motors.param.step_mode);
     digitalWrite(motors.pinout.dir2_pin, direction?HIGH:LOW);
     digitalWrite(motors.pinout.dir1_pin, direction?HIGH:LOW);
+    steps_done = 0;
     RobotCoupe::motors.remaining_steps = m_steps;
-    while(RobotCoupe::motors.remaining_steps){Serial.println("rotating");}
+    _last_move_type = direction?ROTATE_RIGHT:ROTATE_LEFT;
+    while(RobotCoupe::motors.remaining_steps){vTaskDelay(pdMS_TO_TICKS(10));}
+    RobotCoupe::new_position(); // update position
 }
 
 
@@ -60,12 +106,7 @@ void RobotCoupe::angle_to(float angle){
     float move_angle = angle - _position.theta;
 
     // Making sure that angle is [-180; 180] */
-    while(move_angle > 180){
-        move_angle += -360;
-    }
-    while(move_angle < -180){
-        move_angle += 360;
-    }
+    move_angle = restrict_angle(move_angle);
 
     /* Choosing rotation direction */
     if(move_angle >= 0){
@@ -75,41 +116,35 @@ void RobotCoupe::angle_to(float angle){
         RobotCoupe::rotate(0, - move_angle);
     }
 
-    /* Updating to new angle */
-    RobotCoupe::set_theta(angle);
 }
 
 void RobotCoupe::go_to(struct position pos){
     /* Move robot to coordinates.
      * First rotate then move in straight line */
-    
+     
+
     float x = pos.x - _position.x;
     float y = pos.y - _position.y;
     float radius = sqrt(x*x+y*y);
     float angle = atan2(y, x)*360/(2 * PI);
-    RobotCoupe::angle_to(angle);
-    RobotCoupe::move_straight(0, radius);
 
-    // Update new position
-    RobotCoupe::set_x(pos.x);
-    RobotCoupe::set_y(pos.y);
-    
+    RobotCoupe::angle_to(angle);
+    RobotCoupe::move_straight(0, radius);    
 }
 
 void RobotCoupe::go_to_reverse(struct position pos){
     /* Move robot to coordinates.
      * First rotate then move in straight line facing backwards */
+
     
     float x = pos.x - _position.x;
     float y = pos.y - _position.y;
     float radius = sqrt(x*x+y*y);
     float angle = atan2(y, x)*360/(2 * PI);
+
     RobotCoupe::angle_to(angle+180);
     RobotCoupe::move_straight(1, radius);
 
-    // Update new position
-    RobotCoupe::set_x(pos.x);
-    RobotCoupe::set_y(pos.y);
     
 }
 
@@ -167,7 +202,6 @@ int what_zone (struct position pos) {
             return 4; // right_top
     }
 }
-
 
 /**
  * robots go to coordinates following imaginary path to avoid obvious obstacles

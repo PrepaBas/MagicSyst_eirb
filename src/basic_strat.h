@@ -10,7 +10,7 @@ extern RobotCoupe robot;
 extern table table_coupe;
 
 #define HIGH_SPEED 10000
-#define LOW_SPEED 1000
+#define LOW_SPEED 2000
 void function1(){
     robot.motors.enable_steppers();
     robot.motors.param.max_speed=HIGH_SPEED;
@@ -35,9 +35,6 @@ void function1(){
 }
 
 void deposit_bl_cans(){
-    robot.motors.param.max_speed=HIGH_SPEED;
-
-
     /* go to cans */
     robot.follow_to({775, 570});
 

@@ -18,6 +18,12 @@ void StepperMotor::begin(){
     pinMode(StepperMotor::pinout.ms1_pin, OUTPUT);
     pinMode(StepperMotor::pinout.ms2_pin, OUTPUT);
     pinMode(StepperMotor::pinout.ms3_pin, OUTPUT);
+
+    // set step mode to 16th of step
+    digitalWrite(StepperMotor::pinout.ms1_pin, HIGH);
+    digitalWrite(StepperMotor::pinout.ms2_pin, HIGH);
+    digitalWrite(StepperMotor::pinout.ms3_pin, HIGH);
+
     pinMode(StepperMotor::pinout.en_pin, OUTPUT);
     StepperMotor::disable_steppers();
 }
@@ -156,7 +162,7 @@ void StepperMotor::move(uint32_t steps){
  * @brief turn motors up to stop following movement type and number of steps. max_speed speed can be changed midway
  * Calculation at constant acceleration/deceleration (similar to free-fall)
  */
-void StepperMotor::move_task(uint64_t* t0, uint64_t* t1){
+int StepperMotor::move_task(uint64_t* t0, uint64_t* t1){
     
     /* Initialisation of variables */  
     uint32_t steps_dec=0.5*StepperMotor::current_speed*StepperMotor::current_speed /StepperMotor::param.deceleration; // steps required idealy for complete stop at current speed
@@ -202,13 +208,17 @@ void StepperMotor::move_task(uint64_t* t0, uint64_t* t1){
 
         }
         uint64_t waiting_time = 1000000./StepperMotor::current_speed;
-        digitalWrite(StepperMotor::pinout.step1_pin, LOW);
-        digitalWrite(StepperMotor::pinout.step2_pin, LOW);
-        while(*t1-*t0 < waiting_time){*t1=esp_timer_get_time();} // delay for waiting_time
         digitalWrite(StepperMotor::pinout.step1_pin, HIGH);
         digitalWrite(StepperMotor::pinout.step2_pin, HIGH);
+        while(*t1-*t0 < waiting_time){*t1=esp_timer_get_time();} // delay for waiting_time
+        digitalWrite(StepperMotor::pinout.step1_pin, LOW);
+        digitalWrite(StepperMotor::pinout.step2_pin, LOW);
         StepperMotor::remaining_steps-=1;
         *t0 = *t1;
     } 
-    else Serial.println("no steps");
+    else{
+        Serial.println("no step");
+        return 0;
+    }
+    return 1;
 }

@@ -5,13 +5,23 @@
 #include "StepperMotor.h"
 #include "table.h"
 
-//extern table table_coupe;
+/**
+ * @brief different types of movement
+ */
+typedef enum {
+  STRAIGHT_FORWARD=0,
+  STRAIGHT_BACKWARD,
+  ROTATE_RIGHT,
+  ROTATE_LEFT,
+} move_type_t;
+
 
 class RobotCoupe {
   // Attributs : private par defaut
   private:
 
   struct position _position;
+  move_type_t _last_move_type = STRAIGHT_FORWARD;
   float _baseWidth;
   float _wheelRadius;
 
@@ -22,6 +32,7 @@ class RobotCoupe {
   // stepper motors instanciation
   StepperMotor motors;
 
+  uint64_t steps_done = 0;
   // Begin 
   void begin();
 
@@ -38,6 +49,7 @@ class RobotCoupe {
   void go_to_reverse(struct position pos);
   void follow_to(struct position pos);
   void anti_follow_to(struct position pos);
+  void new_position();
 };
 
 
