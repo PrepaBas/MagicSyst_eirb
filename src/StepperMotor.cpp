@@ -216,7 +216,7 @@ int StepperMotor::move_task(uint64_t* t0, uint64_t* t1){
         StepperMotor::remaining_steps-=1;
         *t0 = *t1;
     } 
-    else{
+    else {
         Serial.println("no step");
         return 0;
     }

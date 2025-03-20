@@ -4,15 +4,22 @@
 #include "advanced_movement.h"
 #include "table.h"
 #include "basic_strat.h"
+#include <ESP32Servo.h>
 
+/*
+#define LEFT_SERVO_PIN 23 
+#define RIGHT_SERVO_PIN 22
+Servo myleftservo;
+Servo myrightservo;
+*/
 // DECLARATIONS *********************
 TaskHandle_t moveTask;
 void moveTaskcode(void* parameters);
-TaskHandle_t Task1;
-void Task1code(void* parameters);
+TaskHandle_t dispatchTask;
+void dispatchTaskcode(void* parameters);
 TaskHandle_t securityTask;
 void securityTaskcode(void* parameters);
-RobotCoupe robot(264., 72.2/2);
+RobotCoupe robot(263., 72.2/2);
 
 
 void setup() {
@@ -20,15 +27,21 @@ void setup() {
   Serial.begin(115200);
   robot.motors.pinout = {12, 32, 13, 33, 25, 26, 27, 14};
   robot.motors.begin();
- 
+  /*
+  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(1);
+  myleftservo.setPeriodHertz(50);
+  myleftservo.attach(LEFT_SERVO_PIN, 1000, 2000);
+  myrightservo.setPeriodHertz(50);
+  myrightservo.attach(RIGHT_SERVO_PIN, 1000, 2000);
+  */ 
   xTaskCreate(securityTaskcode, "securityTask", 10000, NULL, 2, &securityTask);    
   delay(500);
   xTaskCreate(moveTaskcode, "moveTask", 10000, NULL, 3, &moveTask);  
   delay(500);  
   vTaskDelay(pdMS_TO_TICKS(3000));
-  xTaskCreate(Task1code, "Task1", 10000, NULL, 1, &Task1);   
+  xTaskCreate(dispatchTaskcode, "dispatchTask", 10000, NULL, 1, &dispatchTask);   
   delay(500);
-
 }
 
 // TASKS *******************
@@ -47,16 +60,29 @@ void moveTaskcode(void* parameters){
     if(robot.motors.move_task(&t0, &t1)) robot.steps_done++;
   }
 }
-void Task1code(void* parameters){
+
+void dispatchTaskcode(void* parameters) {
   /* example of run starting blue */
   // setting initial position 
   vTaskDelay(pdMS_TO_TICKS(100));
+  
   robot.set_x(100);
   robot.set_y(865);
   robot.set_theta(0);
   robot.motors.enable_steppers();
   robot.motors.param.max_speed = 10000;
-  deposit_bl_cans();
+  TaskHandle_t currentTask;
+  xTaskCreate(deposit_bl_cans, "currentTask", 10000, NULL, 1, &currentTask);  
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  robot.motors.remaining_steps=5000;
+  vTaskDelete(currentTask); 
+  //robot.new_position();
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  
+  robot.new_position();
+  go_home();
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  deposit_bl_cans(NULL);
   deposit_tl_cans();
   go_home();
   vTaskDelete ( NULL );
@@ -64,8 +90,8 @@ void Task1code(void* parameters){
 
 
 void securityTaskcode(void* parameters){
-  vTaskDelay(pdMS_TO_TICKS(1000));
-  //robot.motors.remaining_steps = 100;
+  vTaskDelay(pdMS_TO_TICKS(3000));
+  robot.motors.remaining_steps = 50;
   //go_home();
   for(;;){
     vTaskDelay(pdMS_TO_TICKS(10));
@@ -74,6 +100,7 @@ void securityTaskcode(void* parameters){
 }
 
 void loop(){
+  
   while(1){
     vTaskDelay(pdMS_TO_TICKS(1000));
   }

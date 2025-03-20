@@ -34,7 +34,7 @@ void function1(){
 
 }
 
-void deposit_bl_cans(){
+void deposit_bl_cans(void* parameters){
     /* go to cans */
     robot.follow_to({775, 570});
 
@@ -73,8 +73,8 @@ void go_home(){
     robot.motors.param.max_speed=HIGH_SPEED;
     robot.follow_to({200, 865});
     robot.go_to_reverse({100, 865});
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    robot.motors.disable_steppers();
+    //vTaskDelay(pdMS_TO_TICKS(1000));
+    //robot.motors.disable_steppers();
 
 }
 

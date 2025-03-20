@@ -70,6 +70,7 @@ void RobotCoupe::new_position(){
             RobotCoupe::set_theta(restrict_angle(_position.theta - d*360/(PI*_baseWidth)));
             break;
     }
+    steps_done = 0;
 }
 
 void RobotCoupe::move_straight (char direction, float distance){
