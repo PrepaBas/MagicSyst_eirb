@@ -4,6 +4,7 @@
 #include "advanced_movement.h"
 #include "table.h"
 #include "basic_strat.h"
+#include "rank.h"
 #include <ESP32Servo.h>
 
 /*
@@ -19,7 +20,7 @@ TaskHandle_t dispatchTask;
 void dispatchTaskcode(void* parameters);
 TaskHandle_t securityTask;
 void securityTaskcode(void* parameters);
-RobotCoupe robot(263., 72.2/2);
+RobotCoupe robot(263., 72.7/2);
 
 
 void setup() {
@@ -27,6 +28,13 @@ void setup() {
   Serial.begin(115200);
   robot.motors.pinout = {12, 32, 13, 33, 25, 26, 27, 14};
   robot.motors.begin();
+  delay(100);
+  robot.motors.remaining_steps=0;  
+  robot.set_x(100);
+  robot.set_y(865);
+  robot.set_theta(0);
+  robot.motors.enable_steppers();
+  robot.motors.param.max_speed = 10000;
   /*
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
@@ -49,7 +57,6 @@ void setup() {
 
 void moveTaskcode(void* parameters){
   vTaskDelay(pdMS_TO_TICKS(100));
-  robot.motors.remaining_steps=0;
   robot.motors.current_speed=0;
   robot.motors.enable_steppers();
   robot.motors.param.max_speed = 8000;
@@ -61,37 +68,36 @@ void moveTaskcode(void* parameters){
   }
 }
 
+
+#define DISPATCH_TASK_TILL_END(taskcode)  task_on = 1;\
+xTaskCreate(taskcode, "currentTask", 10000, &task_on, 1, &currentTask);\
+while(task_on){vTaskDelay(10);} 
+
+TaskHandle_t currentTask;
+
 void dispatchTaskcode(void* parameters) {
   /* example of run starting blue */
   // setting initial position 
   vTaskDelay(pdMS_TO_TICKS(100));
   
-  robot.set_x(100);
-  robot.set_y(865);
-  robot.set_theta(0);
-  robot.motors.enable_steppers();
-  robot.motors.param.max_speed = 10000;
-  TaskHandle_t currentTask;
-  xTaskCreate(deposit_bl_cans, "currentTask", 10000, NULL, 1, &currentTask);  
-  vTaskDelay(pdMS_TO_TICKS(1000));
-  robot.motors.remaining_steps=5000;
-  vTaskDelete(currentTask); 
-  //robot.new_position();
-  vTaskDelay(pdMS_TO_TICKS(1000));
-  
-  robot.new_position();
-  go_home();
-  vTaskDelay(pdMS_TO_TICKS(1000));
-  deposit_bl_cans(NULL);
-  deposit_tl_cans();
-  go_home();
+  int task_on = 1;
+  function_rank_t* function_rank_ptr = function_rank_begin();
+  while(function_rank_ptr != NULL){
+    function_rank_t* function_rank_ptr_temp = function_rank_ptr;
+    while(function_rank_ptr_temp != NULL){
+      if(function_rank_ptr_temp->prev_function == NULL) break;
+      function_rank_ptr_temp = function_rank_ptr_temp->prev_function;
+    }
+    DISPATCH_TASK_TILL_END(*(function_rank_ptr_temp->function));
+    function_rank_ptr = function_rank_remove(function_rank_ptr, function_rank_ptr_temp);
+  }
+
+
   vTaskDelete ( NULL );
 }
 
 
 void securityTaskcode(void* parameters){
-  vTaskDelay(pdMS_TO_TICKS(3000));
-  robot.motors.remaining_steps = 50;
   //go_home();
   for(;;){
     vTaskDelay(pdMS_TO_TICKS(10));

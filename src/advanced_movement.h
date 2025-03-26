@@ -28,6 +28,7 @@ class RobotCoupe {
   // Methodes : public par defaut:
   public:
   RobotCoupe(float baseWidth, float wheelRadius);
+  ~RobotCoupe();
 
   // stepper motors instanciation
   StepperMotor motors;

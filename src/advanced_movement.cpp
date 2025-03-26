@@ -16,6 +16,11 @@ RobotCoupe::RobotCoupe(float baseWidth, float wheelRadius){
     motors.begin();
 }
 
+
+RobotCoupe::~RobotCoupe(){
+    
+}
+
 /* Setters and Getters -------------------------------------------------------*/
 
 void RobotCoupe::set_x(float x){
