@@ -2,17 +2,26 @@
 #define rank_h
 
 #include <Arduino.h>
-#include <advanced_movement.h> 
-#include <table.h>
+#include "advanced_movement.h" 
+#include "table.h"
 #include "basic_strat.h"
 
-extern RobotCoupe robot;
+typedef void (*Function) (void*); // makes it easy to handle function pointers
 
 typedef struct function_rank{
-    void (*function)(void*);
+    Function function;
     int rank;
     struct function_rank* prev_function;
 }function_rank_t;
+
+typedef struct function_input{
+    Function function;
+    struct position start;
+    struct position end;
+    uint16_t runtime; //[s]
+    uint8_t color;
+    int scale;
+}function_input;
 
 function_rank_t* function_rank_remove(function_rank_t* start_ptr, function_rank_t* to_remove_ptr){
     function_rank_t* function_rank = start_ptr;
@@ -33,10 +42,8 @@ function_rank_t* function_rank_remove(function_rank_t* start_ptr, function_rank_
     return start_ptr;
 }   
 
-typedef void (*function) (void*);
 
-function_rank* function_rank_begin(){
-    function functions[] ={deposit_bl_cans, deposit_tl_cans, go_home ,NULL};
+function_rank* function_rank_begin(Function functions[]){
     int i=0;
     function_rank_t* previous_function_rank=NULL;
     while(functions[i]!=NULL){

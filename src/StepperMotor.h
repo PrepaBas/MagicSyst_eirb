@@ -1,5 +1,5 @@
-#ifndef kinematics_h
-#define kinematics_h
+#ifndef steppermotor_h
+#define steppermotor_h
 
 #include "Arduino.h"
 
@@ -18,10 +18,6 @@ typedef enum {
 
 /**
  * @brief stepper parameters
- * @param max_speed
- * @param acceleration
- * @param deceleration
- * @param step_mode
  */
 typedef struct {
     float max_speed;    // motor max speed [step/second]
@@ -45,22 +41,19 @@ typedef struct {
     uint8_t en_pin;        // reset pin, pull low to disable step pin and force motor to reset position
 } stepper_pinout_t;
 
-/**
- * @brief class to make 2 stepper motors turn simultaniously
- */
-class StepperMotor {
-    public:
-    stepper_parameters_t param = {15000, 500, 7000, 11000, STEP_MODE_SIXTEENTH};
-    stepper_pinout_t pinout;
-    float current_speed = 0; // [Steps/sec]
-    uint32_t remaining_steps = 0;
-    StepperMotor();
-    void begin();
-    void move(uint32_t steps);
-    int move_task(uint64_t* t0, uint64_t* t1);
-    void disable_steppers();
-    void enable_steppers();
-    
-};
+
+stepper_parameters_t stepper_param = {15000, 500, 7000, 11000, STEP_MODE_SIXTEENTH};
+stepper_pinout_t stepper_pinout;
+float current_speed = 0; // [Steps/sec]
+uint32_t remaining_steps = 0;
+uint32_t steps_done = 0;
+
+TaskHandle_t moveTask;
+void moveTaskcode(void* parameters);
+void begin_steppers();
+void move(uint32_t steps);
+int move_task(uint64_t* t0, uint64_t* t1);
+void disable_steppers();
+void enable_steppers();
 
 #endif

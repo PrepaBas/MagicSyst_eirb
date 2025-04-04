@@ -16,42 +16,28 @@ typedef enum {
 } move_type_t;
 
 
-class RobotCoupe {
-  // Attributs : private par defaut
-  private:
+struct position position;
+move_type_t last_move_type = STRAIGHT_FORWARD;
+float baseWidth;
+float wheelRadius;
 
-  struct position _position;
-  move_type_t _last_move_type = STRAIGHT_FORWARD;
-  float _baseWidth;
-  float _wheelRadius;
+// Begin 
+void begin();
 
-  // Methodes : public par defaut:
-  public:
-  RobotCoupe(float baseWidth, float wheelRadius);
-  ~RobotCoupe();
+// Setters
+void set_x(float x);
+void set_y(float y);
+void set_theta(float theta);
 
-  // stepper motors instanciation
-  StepperMotor motors;
-
-  uint64_t steps_done = 0;
-  // Begin 
-  void begin();
-
-  // Setters
-  void set_x(float x);
-  void set_y(float y);
-  void set_theta(float theta);
-
-  // Autres methodes
-  void move_straight(char direction, float distance);
-  void rotate (int direction, float angle);
-  void angle_to(float angle);
-  void go_to(struct position pos);
-  void go_to_reverse(struct position pos);
-  void follow_to(struct position pos);
-  void anti_follow_to(struct position pos);
-  void new_position();
-};
+// Autres methodes
+void move_straight(char direction, float distance);
+void rotate (int direction, float angle);
+void angle_to(float angle);
+void go_to(struct position pos);
+void go_to_reverse(struct position pos);
+void follow_to(struct position pos);
+void anti_follow_to(struct position pos);
+void new_position();
 
 
 #endif
