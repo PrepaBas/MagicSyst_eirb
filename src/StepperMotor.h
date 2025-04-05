@@ -1,5 +1,5 @@
-#ifndef steppermotor_h
-#define steppermotor_h
+#ifndef STEPPER_H
+#define STEPPER_H
 
 #include "Arduino.h"
 
@@ -42,13 +42,7 @@ typedef struct {
 } stepper_pinout_t;
 
 
-stepper_parameters_t stepper_param = {15000, 500, 7000, 11000, STEP_MODE_SIXTEENTH};
-stepper_pinout_t stepper_pinout;
-float current_speed = 0; // [Steps/sec]
-uint32_t remaining_steps = 0;
-uint32_t steps_done = 0;
 
-TaskHandle_t moveTask;
 void moveTaskcode(void* parameters);
 void begin_steppers();
 void move(uint32_t steps);

@@ -1,9 +1,16 @@
-#ifndef movement_h
-#define movement_h
+#ifndef MOVEMENT_H
+#define MOVEMENT_H
 
 #include "Arduino.h"
 #include "StepperMotor.h"
 #include "table.h"
+
+
+/* Extern */
+extern stepper_parameters_t stepper_param;
+extern uint32_t steps_done;
+extern stepper_pinout_t stepper_pinout;
+extern uint32_t remaining_steps;
 
 /**
  * @brief different types of movement
@@ -16,13 +23,6 @@ typedef enum {
 } move_type_t;
 
 
-struct position position;
-move_type_t last_move_type = STRAIGHT_FORWARD;
-float baseWidth;
-float wheelRadius;
-
-// Begin 
-void begin();
 
 // Setters
 void set_x(float x);
@@ -38,6 +38,4 @@ void go_to_reverse(struct position pos);
 void follow_to(struct position pos);
 void anti_follow_to(struct position pos);
 void new_position();
-
-
 #endif

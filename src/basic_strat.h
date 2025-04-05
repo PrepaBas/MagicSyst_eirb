@@ -1,7 +1,7 @@
-#ifndef basic_strat_h
-#define basic_strat_h
+#ifndef BASIC_STRAT_H
+#define BASIC_STRAT_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 #include "advanced_movement.h" 
 #include "table.h"
 #include "StepperMotor.h"

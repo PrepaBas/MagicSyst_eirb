@@ -1,25 +1,37 @@
 #include <Arduino.h>
+#include <ESP32Servo.h>
 #include <time.h>
 #include "StepperMotor.h"
 #include "advanced_movement.h"
-#include "table.h"
 #include "basic_strat.h"
 #include "rank.h"
-#include <ESP32Servo.h>
+#include "table.h"
 
-/*
-#define LEFT_SERVO_PIN 23 
-#define RIGHT_SERVO_PIN 22
-Servo myleftservo;
-Servo myrightservo;
-*/
 // DECLARATIONS *********************
 TaskHandle_t dispatchTask;
 void dispatchTaskcode(void* parameters);
 TaskHandle_t securityTask;
 void securityTaskcode(void* parameters);
 
+
+TaskHandle_t moveTask;
 TaskHandle_t currentTask;
+
+
+/* Extern from stepperMotor*/
+extern stepper_parameters_t stepper_param;
+extern stepper_pinout_t stepper_pinout;
+extern float current_speed; // [Steps/sec]
+extern uint32_t remaining_steps;
+extern uint32_t steps_done;
+
+
+/* Extern from advanced_movement*/
+extern struct position position;
+extern move_type_t last_move_type;
+extern float baseWidth;
+extern float wheelRadius;
+
 
 #define DISPATCH_TASK_TILL_END(taskcode)  dispatch_wait = 1;\
 xTaskCreate(taskcode, "currentTask", 10000, &dispatch_wait, 1, &currentTask);\
@@ -29,22 +41,13 @@ while(dispatch_wait){if(*robot_stop_ptr == 1) break; vTaskDelay(10);}
 void setup() {
   delay(1000);
   Serial.begin(115200);
+  delay(50);
   stepper_pinout = {12, 32, 13, 33, 25, 26, 27, 14};
-  begin();
-  delay(100);
   set_x(100);
   set_y(865);
   set_theta(0);
   enable_steppers();
   stepper_param.max_speed = 10000;
-  /*
-  ESP32PWM::allocateTimer(0);
-  ESP32PWM::allocateTimer(1);
-  myleftservo.setPeriodHertz(50);
-  myleftservo.attach(LEFT_SERVO_PIN, 1000, 2000);
-  myrightservo.setPeriodHertz(50);
-  myrightservo.attach(RIGHT_SERVO_PIN, 1000, 2000);
-  */ 
   int robot_stop = 0;
   xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);    
   delay(500);

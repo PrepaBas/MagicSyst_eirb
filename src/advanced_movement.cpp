@@ -6,7 +6,16 @@
 /* file header file */
 #include "advanced_movement.h"
 #include "StepperMotor.h"
+#include "table.h"
 
+struct position position;
+move_type_t last_move_type = STRAIGHT_FORWARD;
+float baseWidth;
+float wheelRadius;
+
+
+table table_coupe = {{650, 670}, {650, 1300}, {2340, 670}, {2340, 1300}, {3000, 2000}};
+ 
 /* Setters and Getters -------------------------------------------------------*/
 
 void set_x(float x){

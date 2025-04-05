@@ -1,5 +1,5 @@
-#ifndef table_h
-#define table_h
+#ifndef TABLE_H
+#define TABLE_H
 
 
 struct position {
@@ -18,6 +18,5 @@ struct table {
 };
 
 
-table table_coupe = {{650, 670}, {650, 1300}, {2340, 670}, {2340, 1300}, {3000, 2000}};
 
 #endif

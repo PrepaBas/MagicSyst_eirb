@@ -1,7 +1,7 @@
-#ifndef rank_h
-#define rank_h
+#ifndef RANK_H
+#define RANK_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 #include "advanced_movement.h" 
 #include "table.h"
 #include "basic_strat.h"
