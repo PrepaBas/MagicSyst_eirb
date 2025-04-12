@@ -47,8 +47,8 @@ void setup() {
   set_y(865);
   set_theta(0);
   begin_steppers();
-  wheelRadius = 72.8/2;
-  baseWidth = 256.;
+  wheelRadius = 72.2/2;
+  baseWidth = 263.;
   enable_steppers();
   stepper_param.max_speed = 10000;
   int robot_stop = 0;
@@ -69,6 +69,7 @@ void dispatchTaskcode(void* parameters) {
   int* robot_stop_ptr = (int*)parameters;
   /* Creation of function structures */
   Function functions[] ={
+    deposit_bl_cans_2,
     deposit_bl_cans,
     deposit_tl_cans,
     go_home,

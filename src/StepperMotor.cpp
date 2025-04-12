@@ -4,7 +4,7 @@
 
 
 /* Global Variables */
-stepper_parameters_t stepper_param = {15000, 500, 7000, 11000, STEP_MODE_SIXTEENTH};
+stepper_parameters_t stepper_param = {10000, 500, 11000, 11000, STEP_MODE_SIXTEENTH};
 stepper_pinout_t stepper_pinout;
 float current_speed = 0; // [Steps/sec]
 uint32_t remaining_steps = 0;

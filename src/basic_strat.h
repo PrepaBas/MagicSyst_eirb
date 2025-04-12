@@ -47,13 +47,13 @@ void deposit_bl_cans(void* parameters){
     
     /* go to deposit location */
     stepper_param.max_speed=HIGH_SPEED;
-    anti_follow_to({250, 300});
+    anti_follow_to({300, 300});
 
     /* deposit cans */
     stepper_param.max_speed=LOW_SPEED;
-    go_to({250, 240});
+    go_to({300, 240});
     vTaskDelay(pdMS_TO_TICKS(1000));
-    go_to_reverse({250, 400});
+    go_to_reverse({300, 400});
 
     END_TASK
 }
@@ -79,6 +79,18 @@ void go_home(void* parameters){
     follow_to({200, 865});
     go_to_reverse({100, 865});
 
+    END_TASK
+}
+
+void deposit_bl_cans_2(void* parameters){
+    follow_to({400, 400});
+    stepper_param.max_speed=LOW_SPEED;
+    go_to({250, 400});
+    go_to_reverse({400, 400});
+    stepper_param.max_speed=HIGH_SPEED;
+    go_to({300, 865});
+    go_to({250, 865});
+    go_to_reverse({500, 865});
     END_TASK
 }
 
