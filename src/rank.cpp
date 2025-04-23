@@ -19,17 +19,15 @@ int Macro::rank()
   return 3;
 }
 
-std::vector<Macro> begin_macro()
-{
+std::vector<Macro> begin_macro() {
   std::vector<Macro> macros;
-  Macro macro(deposit_bl_cans, (struct position){30, 30}, (struct position){50, 50}, 5000, 0, 5);
-  macros.push_back(macro);
-  macro = {deposit_bl_cans_2, (struct position){30, 30}, (struct position){50, 50}, 5000, 0, 5};
-  macros.push_back(macro);
-  macro = {deposit_tl_cans, (struct position){30, 30}, (struct position){50, 50}, 5000, 0, 5};
-  macros.push_back(macro);
-  macro = {go_home, (struct position){30, 30}, (struct position){50, 50}, 5000, 0, 5};
-  macros.push_back(macro);
+  macros.reserve(4);  // optional but efficient
+
+  macros.emplace_back(Macro{deposit_bl_cans,   {30, 30}, {50, 50}, 5000, 0, 5});
+  macros.emplace_back(Macro{deposit_bl_cans_2, {30, 30}, {50, 50}, 5000, 0, 5});
+  macros.emplace_back(Macro{deposit_tl_cans,   {30, 30}, {50, 50}, 5000, 0, 5});
+  macros.emplace_back(Macro{go_home,           {30, 30}, {50, 50}, 5000, 0, 5});
+
   return macros;
 }
 
@@ -44,20 +42,20 @@ void dispatchTaskcode(void *parameters)
   while (!list_macro.empty())
   {
     /* research max rank */
-    Macro best_macro = list_macro[0];
-    int best_rank = best_macro.rank();
+    int best_rank = list_macro[0].rank();
+    int index = 0;
     int position_macro = 0;
     for (Macro macro : list_macro)
     {
       int macro_rank = macro.rank();
-      position_macro++;
       if (macro_rank > best_rank)
       {
-        best_macro = macro;
         best_rank = macro_rank;
-      }
+        position_macro = index;
+      }   
+      index++;
     }
-    position_macro--;
+    Macro best_macro = list_macro.at(position_macro);
     xTaskCreate(best_macro.function, "currentTask", 10000, NULL, 1, &currentTask);
 
     while (eTaskGetState(currentTask) != eDeleted)
