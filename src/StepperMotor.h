@@ -41,8 +41,6 @@ typedef struct {
     uint8_t en_pin;        // reset pin, pull low to disable step pin and force motor to reset position
 } stepper_pinout_t;
 
-
-
 void moveTaskcode(void* parameters);
 void begin_steppers();
 void move(uint32_t steps);

@@ -3,19 +3,19 @@
 #include <time.h>
 #include "StepperMotor.h"
 #include "advanced_movement.h"
-#include "basic_strat.h"
 #include "rank.h"
 #include "table.h"
+#include "basic_strat.h"
 
 // DECLARATIONS *********************
 TaskHandle_t dispatchTask;
-void dispatchTaskcode(void* parameters);
+extern void dispatchTaskcode(void* parameters);
 TaskHandle_t securityTask;
 void securityTaskcode(void* parameters);
 
+TaskHandle_t currentTask;
 
 TaskHandle_t moveTask;
-TaskHandle_t currentTask;
 
 
 /* Extern from stepperMotor*/
@@ -33,9 +33,6 @@ extern float baseWidth;
 extern float wheelRadius;
 
 
-#define DISPATCH_TASK_TILL_END(taskcode)  dispatch_wait = 1;\
-xTaskCreate(taskcode, "currentTask", 10000, &dispatch_wait, 1, &currentTask);\
-while(dispatch_wait){if(*robot_stop_ptr == 1) break; vTaskDelay(10);} 
 
 
 void setup() {
@@ -63,51 +60,12 @@ void setup() {
 // TASKS *******************
 
 
-void dispatchTaskcode(void* parameters) {
-  vTaskDelay(pdMS_TO_TICKS(3000));
-  int dispatch_wait = 1; 
-  int* robot_stop_ptr = (int*)parameters;
-  /* Creation of function structures */
-  Function functions[] ={
-    deposit_bl_cans_2,
-    deposit_bl_cans,
-    deposit_tl_cans,
-    go_home,
-    NULL
-  };
-  function_rank_t* function_rank_list = function_rank_begin(functions);
-
-  /* Loop while actions are left */
-  while(function_rank_list != NULL){
-    /* calculate new rank */
-
-
-    /* choose function to execute */
-    function_rank_t* function_rank_ptr = function_rank_list;
-    while(function_rank_ptr != NULL){
-      if(function_rank_ptr->prev_function == NULL) break;
-      function_rank_ptr = function_rank_ptr->prev_function;
-    }
-
-    /* execute function and remove it from available functions */
-    DISPATCH_TASK_TILL_END(*(function_rank_ptr->function));
-    while(*robot_stop_ptr == 1){
-      vTaskDelay(pdMS_TO_TICKS(50));
-    }
-    if(dispatch_wait == 0){
-      function_rank_list = function_rank_remove(function_rank_list, function_rank_ptr);
-    }
-  }
-
-  vTaskDelete ( NULL );
-}
-
 
 void securityTaskcode(void* parameters){
   /* vTaskDelay(pdMS_TO_TICKS(4500));
   int* robot_stop_ptr = (int*)parameters;
   *robot_stop_ptr = 1;
-  vTaskDelete(currentTask);
+  vTaskSuspend(currentTask);
   remaining_steps = 200;
   new_position();
   vTaskDelay(pdMS_TO_TICKS(5000));
