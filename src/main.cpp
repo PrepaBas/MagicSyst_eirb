@@ -5,7 +5,6 @@
 #include "rank.h"
 #include "table.h"
 #include "basic_strat.h"
-#include "NewPing.h"
 #include "servom.h"
 
 // DECLARATIONS *********************
@@ -56,14 +55,6 @@ void setup() {
   stepper_param.max_speed = 10000;
   int robot_stop = 0;
 
-  /*
-    NewPing sonar(17, 17, 200);
-  while(1){
-    Serial.println(sonar.ping_cm());
-    
-    vTaskDelay(pdMS_TO_TICKS(200));
-  }
-  */
 
   xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);    
   delay(500);

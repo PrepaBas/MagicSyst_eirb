@@ -2,9 +2,13 @@
 #include "advanced_movement.h"  // déplacé ici si nécessaire
 #include "servom.h"
 
+
+enum security_protocol protocol = NO_SECURITY;
+
 void function1(){
     enable_steppers();
     stepper_param.max_speed=HIGH_SPEED;
+    protocol = EMPTY_COMMUTE;
     vTaskDelay(pdMS_TO_TICKS(200));
     set_x(100);
     set_y(865);
@@ -12,16 +16,20 @@ void function1(){
 
     follow_to({775, 570});
     stepper_param.max_speed=LOW_SPEED;
+    protocol = EMPTY_APPROACH;
     go_to({775, 220});
     vTaskDelay(pdMS_TO_TICKS(1000));
+    protocol = BACKING;
     go_to_reverse({775, 600}); 
     
+    protocol = LOADED_COMMUTE;
     stepper_param.max_speed=HIGH_SPEED;
     follow_to({200, 865});
     angle_to(0);
+    protocol = BACKING;
     go_to_reverse({100, 865});
     vTaskDelay(pdMS_TO_TICKS(1000));
-    disable_steppers();
+    protocol = EMPTY_COMMUTE;
 
 }
 
