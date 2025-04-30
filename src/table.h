@@ -1,5 +1,5 @@
-#ifndef table_h
-#define table_h
+#ifndef TABLE_H
+#define TABLE_H
 
 
 struct position {
@@ -16,6 +16,7 @@ struct table {
     struct position tr;
     struct position extreme;
 };
+
 
 
 #endif
