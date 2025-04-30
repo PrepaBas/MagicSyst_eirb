@@ -1,5 +1,6 @@
 #include "basic_strat.h"
 #include "advanced_movement.h"  // déplacé ici si nécessaire
+#include "servom.h"
 
 void function1(){
     enable_steppers();
@@ -25,13 +26,15 @@ void function1(){
 }
 
 void deposit_bl_cans(void* parameters){
+    stepper_param.max_speed=HIGH_SPEED;
+    rise_fork();
     /* go to cans */
     follow_to({775, 570});
 
     /* contact cans */
     stepper_param.max_speed=LOW_SPEED;
     go_to({775, 328});
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    lower_fork();
     go_to_reverse({775, 500}); 
     
     /* go to deposit location */
@@ -41,7 +44,7 @@ void deposit_bl_cans(void* parameters){
     /* deposit cans */
     stepper_param.max_speed=LOW_SPEED;
     go_to({300, 240});
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    rise_fork();
     go_to_reverse({300, 400});
 
     vTaskDelete(NULL);
@@ -49,6 +52,7 @@ void deposit_bl_cans(void* parameters){
 
 void deposit_tl_cans(void* parameters){
     stepper_param.max_speed=HIGH_SPEED;
+    rise_fork();
 
     /* go to cans */
     follow_to({825, 1500});
@@ -56,7 +60,7 @@ void deposit_tl_cans(void* parameters){
     /* contact cans */
     stepper_param.max_speed=LOW_SPEED;
     go_to({825, 1580});
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    lower_fork();
     go_to_reverse({825, 1500}); 
 
     vTaskDelete(NULL);
@@ -67,7 +71,7 @@ void go_home(void* parameters){
     stepper_param.max_speed=HIGH_SPEED;
     follow_to({200, 865});
     go_to_reverse({100, 865});
-
+    rise_fork();
     vTaskDelete(NULL);
 }
 
@@ -75,10 +79,12 @@ void deposit_bl_cans_2(void* parameters){
     follow_to({400, 400});
     stepper_param.max_speed=LOW_SPEED;
     go_to({250, 400});
+    lower_fork();
     go_to_reverse({400, 400});
     stepper_param.max_speed=HIGH_SPEED;
     go_to({300, 865});
     go_to({250, 865});
+    rise_fork();
     go_to_reverse({500, 865});
     vTaskDelete(NULL);
 }

@@ -1,17 +1,19 @@
 #include <Arduino.h>
-#include <ESP32Servo.h>
 #include <time.h>
 #include "StepperMotor.h"
 #include "advanced_movement.h"
 #include "rank.h"
 #include "table.h"
 #include "basic_strat.h"
+#include "NewPing.h"
+#include "servom.h"
 
 // DECLARATIONS *********************
 TaskHandle_t dispatchTask;
 extern void dispatchTaskcode(void* parameters);
+
 TaskHandle_t securityTask;
-void securityTaskcode(void* parameters);
+extern void securityTaskcode(void* parameters);
 
 TaskHandle_t currentTask;
 
@@ -44,11 +46,25 @@ void setup() {
   set_y(865);
   set_theta(0);
   begin_steppers();
+  servo_begin(23, 22);
+  rise_fork();
+  lower_fork();
+  rise_fork();
   wheelRadius = 72.2/2;
   baseWidth = 263.;
   enable_steppers();
   stepper_param.max_speed = 10000;
   int robot_stop = 0;
+
+  /*
+    NewPing sonar(17, 17, 200);
+  while(1){
+    Serial.println(sonar.ping_cm());
+    
+    vTaskDelay(pdMS_TO_TICKS(200));
+  }
+  */
+
   xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);    
   delay(500);
   xTaskCreate(moveTaskcode, "moveTask", 10000, NULL, 3, &moveTask);  
@@ -59,22 +75,6 @@ void setup() {
 
 // TASKS *******************
 
-
-
-void securityTaskcode(void* parameters){
-  /* vTaskDelay(pdMS_TO_TICKS(4500));
-  int* robot_stop_ptr = (int*)parameters;
-  *robot_stop_ptr = 1;
-  vTaskSuspend(currentTask);
-  remaining_steps = 200;
-  new_position();
-  vTaskDelay(pdMS_TO_TICKS(5000));
-  *robot_stop_ptr = 0; */
-  for(;;){
-    vTaskDelay(pdMS_TO_TICKS(10));
-    //robot.motors.param.max_speed = robot.motors.param.min_speed+(ms++%50000);
-  }
-}
 
 void loop(){
   
