@@ -4,14 +4,19 @@
 #include "observer.h"
 #include "advanced_movement.h"
 
-void stop_robot(int *robot_stop_ptr)
+
+int stop_robot(int *robot_stop_ptr)
 {
-  *robot_stop_ptr = 1;
-  vTaskSuspend(currentTask);
-  remaining_steps = 200;
-  new_position();
-  vTaskDelay(pdMS_TO_TICKS(5000));
-  *robot_stop_ptr = 0;
+  *robot_stop_ptr = 1; // update status
+  vTaskSuspend(currentTask); // prevent any further actions
+  uint32_t cut_steps = 0; 
+  if(remaining_steps > 200){ // allow for slow stop
+    cut_steps = remaining_steps - 200;
+    remaining_steps = 200;
+  }
+  while(remaining_steps){} // wait for complete stop of robot
+  new_position(); // update position as the normal function is paused and might be canceled
+  return cut_steps;
 }
 
 void securityTaskcode(void *parameters)
@@ -36,6 +41,9 @@ void securityTaskcode(void *parameters)
     unsigned long cn_distance = cn.ping_cm();
     unsigned long cf_distance = cf.ping_cm();
     vTaskDelay(pdMS_TO_TICKS(10));
+    if(fc_distance < 20){
+      int cut_steps = stop_robot(robot_stop_ptr);
+    }
     // robot.motors.param.max_speed = robot.motors.param.min_speed+(ms++%50000);
   }
 }

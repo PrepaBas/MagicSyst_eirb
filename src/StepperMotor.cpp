@@ -16,7 +16,8 @@ uint32_t steps_done = 0;
  * @brief init stepper motor pinout and disable steppers
  * @paragraph NONE
  */
-void begin_steppers(){
+void begin_steppers(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, uint8_t pin5, uint8_t pin6, uint8_t pin7,uint8_t pin8){
+    stepper_pinout = (stepper_pinout_t){pin1, pin2, pin3, pin4, pin5, pin6, pin7, pin8};
     pinMode(stepper_pinout.step1_pin, OUTPUT);
     pinMode(stepper_pinout.step2_pin, OUTPUT);
     pinMode(stepper_pinout.dir1_pin, OUTPUT);
@@ -34,6 +35,12 @@ void begin_steppers(){
     enable_steppers();
 }
 
+void set_direction(uint8_t first_stepper_dir, uint8_t second_stepper_dir){
+    digitalWrite(stepper_pinout.dir2_pin, second_stepper_dir);
+    digitalWrite(stepper_pinout.dir1_pin, first_stepper_dir);
+}
+
+
 /**
  * @brief cut courant of stepper motors
  */
@@ -49,123 +56,7 @@ void enable_steppers(){
 }
 
 /**
- * @brief Move both motors by step count. Auto acceleration/deceleration
- * @param uint8_t dir
- * @param uint32_t steps
- */
-void move(uint32_t steps){
-    // digitalWrite(stepper_pinout.dir_pin, dir?HIGH:LOW);
-    unsigned long speed_timer = 1; // defines frequency at wich the step_pin is activated to generate shaft speed
-
-
-    /* search nuber of steps during acceleration phase */
-    float inv_acc = 1000000000000./stepper_param.acceleration;
-    uint64_t steps_acc = 0.5*stepper_param.max_speed*stepper_param.max_speed/stepper_param.acceleration;
-    uint64_t steps_dec = 0.5*stepper_param.max_speed*stepper_param.max_speed/stepper_param.deceleration;
-    
-    /* rotation of motor */
-    uint64_t n = 0; // step counter
-    if(steps > steps_acc + steps_dec){ // case of three distinct speed phases : acceleration, cruise, deceleration
-
-        /* instanciation of timers */
-        unsigned long t1; // start of previous step pulse.
-        unsigned long t2; // actual time
-        unsigned long t0 = micros(); // start time since begining of movement
-        
-
-        /* start of acceleration */
-        while(n < steps_acc){
-            t2 = micros();
-            if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
-                digitalWrite(stepper_pinout.step1_pin, HIGH);
-                digitalWrite(stepper_pinout.step2_pin, HIGH);
-                speed_timer = inv_acc / (t2 - t0); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v
-                if(speed_timer >1000) speed_timer = 1000;
-                n++;
-                t1 = t2;
-                digitalWrite(stepper_pinout.step1_pin, LOW); // timing of low-pull on step_pin is not critical
-                digitalWrite(stepper_pinout.step2_pin, LOW);
-            }
-        }
-        /* end of acceleration */
-        /* begining of cruise */
-        speed_timer = 1000000/stepper_param.max_speed;//./stepper_param.max_speed; // timer for speed is constant
-        while(n < steps-steps_dec){
-            t2 = micros();
-            if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse.
-                digitalWrite(stepper_pinout.step1_pin, HIGH);
-                digitalWrite(stepper_pinout.step2_pin, HIGH);
-                n++; 
-                t1 = t2;
-                digitalWrite(stepper_pinout.step1_pin, LOW); // timing of low-pull on step_pin is not critical
-                digitalWrite(stepper_pinout.step2_pin, LOW);
-            }
-        }
-        /* end of cruise */
-        /* begining of deceleration */
-        t0=micros(); // reset time for ease of calculation
-        while(n < steps){
-            t2 = micros();
-            if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
-                digitalWrite(stepper_pinout.step1_pin, HIGH);
-                digitalWrite(stepper_pinout.step2_pin, HIGH);
-                speed_timer = 1000000000000/(stepper_param.max_speed*1000000-stepper_param.deceleration*(t2-t0)); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v  
-                if(speed_timer>1000) speed_timer = 1000;
-                n++; 
-                t1 = t2;
-                digitalWrite(stepper_pinout.step1_pin, LOW); // timing of low-pull on step_pin is not critical
-                digitalWrite(stepper_pinout.step2_pin, LOW);
-            }
-        }
-    }
-    else {
-        unsigned long t1; // start of previous step pulse.
-        unsigned long t2; // actual time
-        unsigned long t0 = micros(); // start time since begining of movement
-        unsigned long top_timer;
-        /* acceleration loop */
-        delayMicroseconds(1000);
-        while(n < steps){ // loop will break before n>=steps
-            t2 = micros();
-            if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
-                digitalWrite(stepper_pinout.step1_pin, HIGH);
-                digitalWrite(stepper_pinout.step2_pin, HIGH);
-                speed_timer = inv_acc/(t2-t0); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v
-                if(speed_timer >1000) speed_timer = 1000;
-                n++;
-                t1 = t2;
-                digitalWrite(stepper_pinout.step1_pin, LOW); // timing of low-pull on step_pin is not critical
-                digitalWrite(stepper_pinout.step2_pin, LOW);
-
-                /* check if number of steps for deceleration */
-                top_timer = speed_timer; // [step/ms]
-                steps_dec = 500000000000/stepper_param.deceleration/top_timer/top_timer ;
-                if(steps - n < steps_dec) break; // stop acceleration phase.
-    
-            }
-        }
-        t0 = micros(); // start time since begining of deceleration
-        /* deceleration loop */
-        while(n<steps){
-            t2 = micros();
-            if(speed_timer <= t2-t1){ // waiting speed_timer time to elapse. First step is forced throught second condition
-                digitalWrite(stepper_pinout.step1_pin, HIGH);
-                digitalWrite(stepper_pinout.step2_pin, HIGH);
-                speed_timer = top_timer/(1-stepper_param.deceleration*(t2-t0)*top_timer*0.000000000001); // calculating time before sending next step HIGH following : v=x'=x''*t, T=(N=1)/v 
-                if(speed_timer >1000) speed_timer = 1000;
-                n++;
-                t1 = t2;
-                digitalWrite(stepper_pinout.step1_pin, LOW); // timing of low-pull on step_pin is not critical
-                digitalWrite(stepper_pinout.step2_pin, LOW);
-            }
-        }
-    }
-}
-
-
-
-/**
- * @brief turn motors up to stop following movement type and number of steps. max_speed speed can be changed midway
+ * @brief turn motors up to stop, following movement type and number of steps. max_speed speed can be changed midway
  * Calculation at constant acceleration/deceleration (similar to free-fall)
  */
 int move_task(uint64_t* t0, uint64_t* t1){

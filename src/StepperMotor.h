@@ -42,8 +42,9 @@ typedef struct {
 } stepper_pinout_t;
 
 void moveTaskcode(void* parameters);
-void begin_steppers();
-void move(uint32_t steps);
+void set_direction(uint8_t first_stepper_dir, uint8_t second_stepper_dir);
+void begin_steppers(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, uint8_t pin5, uint8_t pin6, uint8_t pin7,uint8_t pin8);
+//void move(uint32_t steps);
 int move_task(uint64_t* t0, uint64_t* t1);
 void disable_steppers();
 void enable_steppers();

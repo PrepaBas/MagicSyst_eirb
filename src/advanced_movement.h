@@ -9,7 +9,6 @@
 /* Extern */
 extern stepper_parameters_t stepper_param;
 extern uint32_t steps_done;
-extern stepper_pinout_t stepper_pinout;
 extern uint32_t remaining_steps;
 
 /**
@@ -30,6 +29,7 @@ void set_y(float y);
 void set_theta(float theta);
 
 // Autres methodes
+void schematics_begin(float base, float wheel, float x, float y, float theta);
 void move_straight(char direction, float distance);
 void rotate (int direction, float angle);
 void angle_to(float angle);
