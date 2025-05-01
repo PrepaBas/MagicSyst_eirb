@@ -7,7 +7,6 @@
 
 
 /* Extern */
-extern stepper_parameters_t stepper_param;
 extern uint32_t steps_done;
 extern uint32_t remaining_steps;
 

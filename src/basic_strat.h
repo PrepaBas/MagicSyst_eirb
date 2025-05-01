@@ -9,8 +9,6 @@
 #define HIGH_SPEED 10000
 #define LOW_SPEED 2000
 
-extern stepper_parameters_t stepper_param;
-
 enum security_protocol{
     EMPTY_COMMUTE,
     LOADED_COMMUTE,

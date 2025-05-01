@@ -44,9 +44,10 @@ typedef struct {
 void moveTaskcode(void* parameters);
 void set_direction(uint8_t first_stepper_dir, uint8_t second_stepper_dir);
 void begin_steppers(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, uint8_t pin5, uint8_t pin6, uint8_t pin7,uint8_t pin8);
-//void move(uint32_t steps);
+void set_speed(uint8_t percentage_of_max_speed);
 int move_task(uint64_t* t0, uint64_t* t1);
 void disable_steppers();
 void enable_steppers();
+step_mode_t get_step_mode();
 
 #endif

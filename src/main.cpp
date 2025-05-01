@@ -6,22 +6,16 @@
 #include "table.h"
 #include "basic_strat.h"
 #include "servom.h"
+#include "observer.h"
 
-// DECLARATIONS *********************
+// DECLARATIONS of taskhandle
 TaskHandle_t dispatchTask;
-extern void dispatchTaskcode(void* parameters);
-
 TaskHandle_t securityTask;
-extern void securityTaskcode(void* parameters);
-
 TaskHandle_t currentTask;
-
 TaskHandle_t moveTask;
 
 
 /* Extern from stepperMotor*/
-extern stepper_parameters_t stepper_param;
-extern float current_speed; // [Steps/sec]
 extern uint32_t remaining_steps;
 extern uint32_t steps_done;
 
@@ -29,9 +23,6 @@ extern uint32_t steps_done;
 /* Extern from advanced_movement*/
 extern struct position position;
 extern move_type_t last_move_type;
-extern float baseWidth;
-extern float wheelRadius;
-
 
 
 
@@ -43,9 +34,9 @@ void setup() {
   begin_steppers(12, 32, 13, 33, 25, 26, 27, 14);
   servo_begin(23, 22);
   schematics_begin(263, 72.2/2, 100, 865, 0);
-  
+
   enable_steppers();
-  stepper_param.max_speed = 10000;
+  set_speed(100);
   int robot_stop = 0;
 
   // Dispatch tasks

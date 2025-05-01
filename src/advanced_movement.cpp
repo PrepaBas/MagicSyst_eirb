@@ -60,7 +60,8 @@ float restrict_angle(float in_angle){
 
 void new_position(){
     /* update position using movement type and steps difference */
-    float d = steps_to_distance(steps_done, wheelRadius, 200*stepper_param.step_mode);
+    uint8_t step_mode = get_step_mode();
+    float d = steps_to_distance(steps_done, wheelRadius, 200*step_mode);
     switch(last_move_type){
         case STRAIGHT_FORWARD:
             set_x(position.x + d*cos(position.theta*PI/180));
@@ -84,7 +85,8 @@ void move_straight (char direction, float distance){
     /* Move robot in a straight line
      * direction :  1 for Forward
      *              0 for Backward */
-    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*stepper_param.step_mode);
+    uint8_t step_mode = get_step_mode();
+    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*step_mode);
     set_direction(direction?LOW:HIGH, direction?HIGH:LOW);
     steps_done = 0;
     remaining_steps = m_steps;
@@ -98,7 +100,8 @@ void rotate (int direction, float angle){
      * direction :  0 for left rotation (anti-clockwise)
      *              1 for right rotation (clockwise) */
     float distance = angle * baseWidth * PI / 360.;
-    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*stepper_param.step_mode);
+    uint8_t step_mode = get_step_mode();
+    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*step_mode);
     set_direction(direction?HIGH:LOW, direction?HIGH:LOW);
     steps_done = 0;
     remaining_steps = m_steps;
