@@ -34,6 +34,7 @@ void function1(){
 }
 
 void deposit_bl_cans(void* parameters){
+    Serial.println("begining deposit_bl_cans");
     set_speed(100);
     rise_fork();
     /* go to cans */
@@ -59,6 +60,7 @@ void deposit_bl_cans(void* parameters){
 }
 
 void deposit_tl_cans(void* parameters){
+    Serial.println("begining deposit_tl_cans");
     set_speed(100);
     rise_fork();
 
@@ -76,6 +78,9 @@ void deposit_tl_cans(void* parameters){
 
 
 void go_home(void* parameters){
+    Serial.println("begining go_home");
+    lower_fork();
+    rise_fork();
     set_speed(100);
     follow_to({200, 865});
     go_to_reverse({100, 865});
@@ -84,7 +89,12 @@ void go_home(void* parameters){
 }
 
 void deposit_bl_cans_2(void* parameters){
+    Serial.println("begining deposit_bl_cans2");
+    rise_fork();
+    lower_fork();
     follow_to({400, 400});
+    rise_fork();
+    lower_fork();
     set_speed(50);
     go_to({250, 400});
     lower_fork();

@@ -4,10 +4,10 @@
 
 
 /* Global Variables */
-stepper_parameters_t stepper_param = {700, 20, 1000, 1000, STEP_MODE_SIXTEENTH};
+stepper_parameters_t stepper_param = {700, 20, 10000, 10000, STEP_MODE_SIXTEENTH};
 stepper_pinout_t stepper_pinout;
 float current_speed = 0; // [Steps/sec]
-float target_speed = 0;
+float target_speed = 2000;
 uint32_t remaining_steps = 0;
 uint32_t steps_done = 0;
 
@@ -50,6 +50,7 @@ void set_speed(uint8_t percentage_of_max_speed){
     if(target_speed < stepper_param.min_speed){
         target_speed = stepper_param.min_speed;
     }
+    target_speed = 10000;
 }
 /**
  * @brief cut courant of stepper motors
@@ -115,14 +116,19 @@ int move_task(uint64_t* t0, uint64_t* t1){
         uint64_t waiting_time = 1000000./current_speed;
         digitalWrite(stepper_pinout.step1_pin, HIGH);
         digitalWrite(stepper_pinout.step2_pin, HIGH);
-        while(*t1-*t0 < waiting_time){*t1=esp_timer_get_time();} // delay for waiting_time
+        while(*t1-*t0 < waiting_time){
+            *t1=esp_timer_get_time(); // delay for waiting_time
+            //vTaskDelay(pdMS_TO_TICKS(1));
+        }
         digitalWrite(stepper_pinout.step1_pin, LOW);
         digitalWrite(stepper_pinout.step2_pin, LOW);
         remaining_steps-=1;
         *t0 = *t1;
+        
     } 
     else {
-        Serial.println("no step");
+        Serial.println("no steps");
+        //vTaskDelay(pdMS_TO_TICKS(100));
         return 0;
     }
     return 1;
@@ -130,6 +136,7 @@ int move_task(uint64_t* t0, uint64_t* t1){
 
 void moveTaskcode(void* parameters){
     // init task
+    Serial.println("beginng movetask");
     vTaskDelay(pdMS_TO_TICKS(100));
     current_speed=0;
     enable_steppers();
@@ -143,6 +150,9 @@ void moveTaskcode(void* parameters){
 
     // loop task
     for(;;){
-      if(move_task(&t0, &t1)) steps_done++;
+        //Serial.println("beginng step");
+      if(move_task(&t0, &t1))steps_done++;
+      
+      
     }
 }

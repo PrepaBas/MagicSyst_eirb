@@ -5,7 +5,7 @@
 #include "advanced_movement.h"
 
 
-int stop_robot(int *robot_stop_ptr)
+uint32_t stop_robot(int *robot_stop_ptr)
 {
   *robot_stop_ptr = 1; // update status
   vTaskSuspend(currentTask); // prevent any further actions
@@ -19,8 +19,14 @@ int stop_robot(int *robot_stop_ptr)
   return cut_steps;
 }
 
+void resume_robot(int* robot_stop_ptr, uint32_t cut_steps){
+  remaining_steps = cut_steps;
+  vTaskResume(currentTask);
+  *robot_stop_ptr = 0;
+}
+
 void securityTaskcode(void *parameters)
-{
+{/*
   NewPing fc(17, 17, 200); // front center
   NewPing fr(17, 17, 200); // front right
   NewPing fl(17, 17, 200); // front left
@@ -41,9 +47,14 @@ void securityTaskcode(void *parameters)
     unsigned long cn_distance = cn.ping_cm();
     unsigned long cf_distance = cf.ping_cm();
     vTaskDelay(pdMS_TO_TICKS(10));
+    
     if(fc_distance < 20){
       int cut_steps = stop_robot(robot_stop_ptr);
+      vTaskDelay(pdMS_TO_TICKS(3000));
+      resume_robot(robot_stop_ptr, cut_steps);
     }
-    // robot.motors.param.max_speed = robot.motors.param.min_speed+(ms++%50000);
+      */
+  for(;;){
+    vTaskDelay(pdMS_TO_TICKS(3000));
   }
 }

@@ -17,7 +17,7 @@ float wheelRadius;
 table table_coupe = {{650, 670}, {650, 1300}, {2340, 670}, {2340, 1300}, {3000, 2000}};
  
 /* Setters and Getters -------------------------------------------------------*/
-void schematics_begin(float base, float wheel, float x, float y, float theta){
+void movement_begin(float base, float wheel, float x, float y, float theta){
     baseWidth = base;
     wheelRadius = wheel;
     set_x(x);
@@ -86,7 +86,7 @@ void move_straight (char direction, float distance){
      * direction :  1 for Forward
      *              0 for Backward */
     uint8_t step_mode = get_step_mode();
-    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*step_mode);
+    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*16);
     set_direction(direction?LOW:HIGH, direction?HIGH:LOW);
     steps_done = 0;
     remaining_steps = m_steps;

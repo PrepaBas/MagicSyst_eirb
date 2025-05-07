@@ -28,7 +28,7 @@ void set_y(float y);
 void set_theta(float theta);
 
 // Autres methodes
-void schematics_begin(float base, float wheel, float x, float y, float theta);
+void movement_begin(float base, float wheel, float x, float y, float theta);
 void move_straight(char direction, float distance);
 void rotate (int direction, float angle);
 void angle_to(float angle);

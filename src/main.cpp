@@ -19,22 +19,19 @@ TaskHandle_t moveTask;
 extern uint32_t remaining_steps;
 extern uint32_t steps_done;
 
-
-/* Extern from advanced_movement*/
-extern struct position position;
-extern move_type_t last_move_type;
-
-
-
 void setup() {
   delay(1000);
 
-  // begin
+  // begins and pins declaration
   Serial.begin(115200);
   begin_steppers(12, 32, 13, 33, 25, 26, 27, 14);
   servo_begin(23, 22);
-  schematics_begin(263, 72.2/2, 100, 865, 0);
+  rise_fork();
+  lower_fork();
+  rise_fork();
+  movement_begin(263, 72.2/2, 100, 865, 0);
 
+  // init robot variables
   enable_steppers();
   set_speed(100);
   int robot_stop = 0;
@@ -44,6 +41,7 @@ void setup() {
   delay(500);
   xTaskCreate(moveTaskcode, "moveTask", 10000, NULL, 3, &moveTask);  
   delay(500); 
+  follow_to({1000, 3000});
   xTaskCreate(dispatchTaskcode, "dispatchTask", 10000, &robot_stop, 1, &dispatchTask);   
   delay(500);
 }
