@@ -27,7 +27,6 @@ int Macro::rank()
   float absolute_travel = delta_x*delta_x+delta_y*delta_y;
   int percentage_of_map = 100 - absolute_travel / MAP_DIAGONAL_SQUARED * 100; // add 0 - 100 to rank
   rank += percentage_of_map;
-  Serial.printf("rank = %d\n", rank);
   rank = Macro::scale * rank;
   return rank;
 }

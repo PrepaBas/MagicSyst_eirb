@@ -4,7 +4,7 @@
 
 
 /* Global Variables */
-stepper_parameters_t stepper_param = {700, 20, 10000, 10000, STEP_MODE_SIXTEENTH};
+stepper_parameters_t stepper_param = {7000, 200, 15000, 15000, STEP_MODE_SIXTEENTH};
 stepper_pinout_t stepper_pinout;
 float current_speed = 0; // [Steps/sec]
 float target_speed = 2000;
@@ -45,12 +45,13 @@ void set_direction(uint8_t first_stepper_dir, uint8_t second_stepper_dir){
     digitalWrite(stepper_pinout.dir1_pin, first_stepper_dir);
 }
 
-void set_speed(uint8_t percentage_of_max_speed){
-    target_speed = percentage_of_max_speed /100 * stepper_param.max_speed * stepper_param.step_mode;
+void set_speed(float percentage_of_max_speed){
+    vTaskDelay(pdMS_TO_TICKS(100));
+    target_speed = 7000 * percentage_of_max_speed; // *stepper_param.step_mode;
     if(target_speed < stepper_param.min_speed){
         target_speed = stepper_param.min_speed;
     }
-    target_speed = 10000;
+    // target_speed = 7000;
 }
 /**
  * @brief cut courant of stepper motors

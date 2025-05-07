@@ -33,7 +33,7 @@ void setup() {
 
   // init robot variables
   enable_steppers();
-  set_speed(100);
+  set_speed(1);
   int robot_stop = 0;
 
   // Dispatch tasks
@@ -41,7 +41,6 @@ void setup() {
   delay(500);
   xTaskCreate(moveTaskcode, "moveTask", 10000, NULL, 3, &moveTask);  
   delay(500); 
-  follow_to({1000, 3000});
   xTaskCreate(dispatchTaskcode, "dispatchTask", 10000, &robot_stop, 1, &dispatchTask);   
   delay(500);
 }
