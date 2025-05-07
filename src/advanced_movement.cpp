@@ -17,6 +17,13 @@ float wheelRadius;
 table table_coupe = {{650, 670}, {650, 1300}, {2340, 670}, {2340, 1300}, {3000, 2000}};
  
 /* Setters and Getters -------------------------------------------------------*/
+void movement_begin(float base, float wheel, float x, float y, float theta){
+    baseWidth = base;
+    wheelRadius = wheel;
+    set_x(x);
+    set_y(y);
+    set_theta(theta);
+}
 
 void set_x(float x){
     position.x = x;
@@ -53,7 +60,8 @@ float restrict_angle(float in_angle){
 
 void new_position(){
     /* update position using movement type and steps difference */
-    float d = steps_to_distance(steps_done, wheelRadius, 200*stepper_param.step_mode);
+    uint8_t step_mode = get_step_mode();
+    float d = steps_to_distance(steps_done, wheelRadius, 200*step_mode);
     switch(last_move_type){
         case STRAIGHT_FORWARD:
             set_x(position.x + d*cos(position.theta*PI/180));
@@ -77,9 +85,9 @@ void move_straight (char direction, float distance){
     /* Move robot in a straight line
      * direction :  1 for Forward
      *              0 for Backward */
-    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*stepper_param.step_mode);
-    digitalWrite(stepper_pinout.dir2_pin, direction?HIGH:LOW);
-    digitalWrite(stepper_pinout.dir1_pin, direction?LOW:HIGH);
+    uint8_t step_mode = get_step_mode();
+    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*16);
+    set_direction(direction?LOW:HIGH, direction?HIGH:LOW);
     steps_done = 0;
     remaining_steps = m_steps;
     last_move_type = direction?STRAIGHT_BACKWARD:STRAIGHT_FORWARD;
@@ -92,9 +100,9 @@ void rotate (int direction, float angle){
      * direction :  0 for left rotation (anti-clockwise)
      *              1 for right rotation (clockwise) */
     float distance = angle * baseWidth * PI / 360.;
-    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*stepper_param.step_mode);
-    digitalWrite(stepper_pinout.dir2_pin, direction?HIGH:LOW);
-    digitalWrite(stepper_pinout.dir1_pin, direction?HIGH:LOW);
+    uint8_t step_mode = get_step_mode();
+    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*step_mode);
+    set_direction(direction?HIGH:LOW, direction?HIGH:LOW);
     steps_done = 0;
     remaining_steps = m_steps;
     last_move_type = direction?ROTATE_RIGHT:ROTATE_LEFT;

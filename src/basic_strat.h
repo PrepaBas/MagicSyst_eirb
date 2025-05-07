@@ -9,8 +9,14 @@
 #define HIGH_SPEED 10000
 #define LOW_SPEED 2000
 
-extern stepper_parameters_t stepper_param;
-
+enum security_protocol{
+    EMPTY_COMMUTE,
+    LOADED_COMMUTE,
+    EMPTY_APPROACH,
+    LOADED_APPROACH,
+    BACKING,
+    NO_SECURITY,
+};
 // Déclarations uniquement
 void function1();
 void deposit_bl_cans(void* parameters);
