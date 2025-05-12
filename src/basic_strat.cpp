@@ -105,5 +105,6 @@ void deposit_bl_cans_2(void* parameters){
     go_to({250, 865});
     rise_fork();
     go_to_reverse({500, 865});
+    follow_to({2000, 300});
     vTaskDelete(NULL);
 }

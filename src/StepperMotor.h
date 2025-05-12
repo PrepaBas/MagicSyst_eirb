@@ -9,10 +9,11 @@
  */
 typedef enum {
     STEP_MODE_FULL = 1,
-    STEP_MODE_HALF = 2,
-    STEP_MODE_QUARTER = 4,
-    STEP_MODE_EIGHTH = 8,
-    STEP_MODE_SIXTEENTH = 16,
+    STEP_MODE_2 = 2,
+    STEP_MODE_4 = 4,
+    STEP_MODE_8 = 8,
+    STEP_MODE_16 = 16,
+    STEP_MODE_32 = 32,
 } step_mode_t;
 
 

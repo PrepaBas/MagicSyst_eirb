@@ -29,7 +29,7 @@ void setup() {
   rise_fork();
   lower_fork();
   rise_fork();
-  movement_begin(263, 72.2/2, 100, 865, 0);
+  movement_begin(264., 71.8/2, 100, 865, 0);
 
   // init robot variables
   enable_steppers();
@@ -39,7 +39,7 @@ void setup() {
   // Dispatch tasks
   xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);    
   delay(500);
-  xTaskCreate(moveTaskcode, "moveTask", 10000, NULL, 3, &moveTask);  
+  xTaskCreate(moveTaskcode, "moveTask", 10000, &robot_stop, 2, &moveTask);  
   delay(500); 
   xTaskCreate(dispatchTaskcode, "dispatchTask", 10000, &robot_stop, 1, &dispatchTask);   
   delay(500);

@@ -86,7 +86,7 @@ void move_straight (char direction, float distance){
      * direction :  1 for Forward
      *              0 for Backward */
     uint8_t step_mode = get_step_mode();
-    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*16);
+    uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*step_mode);
     set_direction(direction?LOW:HIGH, direction?HIGH:LOW);
     steps_done = 0;
     remaining_steps = m_steps;
