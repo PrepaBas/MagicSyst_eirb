@@ -7,8 +7,9 @@
 #include "advanced_movement.h"
 #include "StepperMotor.h"
 #include "table.h"
+#include "FastTrig.h"
 
-struct position position;
+struct position position = {0, 0, 0};
 move_type_t last_move_type = STRAIGHT_FORWARD;
 float baseWidth;
 float wheelRadius;
@@ -37,6 +38,9 @@ void set_theta(float theta){
     position.theta = theta;
 }
 
+float get_theta(){
+    return position.theta;
+}
 
 uint64_t distance_to_steps(float distance, float radius, uint16_t steps_per_revolution){
     uint64_t steps = steps_per_revolution * distance / (2. * PI * radius);
@@ -60,24 +64,33 @@ float restrict_angle(float in_angle){
 
 void new_position(){
     /* update position using movement type and steps difference */
-    uint8_t step_mode = get_step_mode();
-    float d = steps_to_distance(steps_done, wheelRadius, 200*step_mode);
+    uint8_t step_mode = 16;
+    float d = steps_to_distance(steps_done, wheelRadius, 200*step_mode);   
+    float theta = get_theta();
+    Serial.print(theta);
     switch(last_move_type){
+        case ROTATE_LEFT:
+        {
+            float full_angle = theta - d*360./(PI*baseWidth);
+            set_theta(full_angle);
+            break;
+        }
         case STRAIGHT_FORWARD:
-            set_x(position.x + d*cos(position.theta*PI/180));
-            set_y(position.y + d*sin(position.theta*PI/180));
+            set_x(position.x + d*icos(theta));
+            set_y(position.y + d*isin(theta));
             break;
         case STRAIGHT_BACKWARD:
-            set_x(position.x - d*cos(position.theta*PI/180));
-            set_y(position.y - d*sin(position.theta*PI/180)); 
+            set_x(position.x - d*icos(theta));
+            set_y(position.y - d*isin(theta)); 
             break;
         case ROTATE_RIGHT:
-            set_theta(restrict_angle(position.theta + d*360/(PI*baseWidth)));
+            set_theta(theta + d*360./(PI*baseWidth));
             break;
-        case ROTATE_LEFT:
-            set_theta(restrict_angle(position.theta - d*360/(PI*baseWidth)));
+        default:
             break;
-    }
+        }
+    Serial.print("   ");
+    Serial.println(position.theta);    
     steps_done = 0;
 }
 
@@ -91,7 +104,7 @@ void move_straight (char direction, float distance){
     steps_done = 0;
     remaining_steps = m_steps;
     last_move_type = direction?STRAIGHT_BACKWARD:STRAIGHT_FORWARD;
-    while(remaining_steps){vTaskDelay(pdMS_TO_TICKS(10));}
+    while(remaining_steps){vTaskDelay(pdMS_TO_TICKS(30));}
     new_position(); // update position    
 }
 
@@ -106,7 +119,7 @@ void rotate (int direction, float angle){
     steps_done = 0;
     remaining_steps = m_steps;
     last_move_type = direction?ROTATE_RIGHT:ROTATE_LEFT;
-    while(remaining_steps){vTaskDelay(pdMS_TO_TICKS(10));}
+    while(remaining_steps){vTaskDelay(pdMS_TO_TICKS(30));}
     new_position(); // update position
 }
 

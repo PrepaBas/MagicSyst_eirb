@@ -3,7 +3,7 @@
 #include "Arduino.h"
 
 /* Global Variables */
-stepper_parameters_t stepper_param = {2000, 50, 30000, 30000, STEP_MODE_32};
+stepper_parameters_t stepper_param = {300, 10, 400, 700, STEP_MODE_16};
 stepper_pinout_t stepper_pinout;
 float current_speed = 0; // [Steps/sec]
 float target_speed = 2000;
@@ -27,11 +27,15 @@ void begin_steppers(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, uint
 
     // set step mode to 16th of a step
     digitalWrite(stepper_pinout.ms1_pin, HIGH);
-    digitalWrite(stepper_pinout.ms2_pin, HIGH);
-    digitalWrite(stepper_pinout.ms3_pin, HIGH);
+    digitalWrite(stepper_pinout.ms2_pin, LOW);
+    digitalWrite(stepper_pinout.ms3_pin, LOW);
 
     pinMode(stepper_pinout.en_pin, OUTPUT);
     enable_steppers();
+    stepper_param.acceleration*=stepper_param.step_mode;
+    stepper_param.deceleration*=stepper_param.step_mode;
+    stepper_param.min_speed*=stepper_param.step_mode;
+    stepper_param.max_speed *=stepper_param.step_mode;
 }
 
 step_mode_t get_step_mode()
@@ -47,8 +51,7 @@ void set_direction(uint8_t first_stepper_dir, uint8_t second_stepper_dir)
 
 void set_speed(float percentage_of_max_speed)
 {
-    vTaskDelay(pdMS_TO_TICKS(100));
-    target_speed = 7000 * percentage_of_max_speed * stepper_param.step_mode;
+    target_speed = stepper_param.max_speed * percentage_of_max_speed;
     if (target_speed < stepper_param.min_speed)
     {
         target_speed = stepper_param.min_speed;
@@ -143,8 +146,8 @@ int move_task(uint64_t *t0, uint64_t *t1)
     }
     else
     {
-        // Serial.println("no steps");
-        vTaskDelay(pdMS_TO_TICKS(100));
+        //Serial.println("no steps");
+        vTaskDelay(pdMS_TO_TICKS(1));
         return 0;
     }
     return 1;
@@ -178,8 +181,97 @@ void moveTaskcode(void *parameters)
         {
             while(remaining_steps == 1)
             {
-                vTaskDelay(pdMS_TO_TICKS(100));
+                vTaskDelay(pdMS_TO_TICKS(10));
             }
         }
     }
+}
+
+////////////////////////////////////////////////////////////
+
+bool parity = true;
+uint64_t waiting_time;
+
+int move_task_este(uint64_t *t0, uint64_t *t1)
+{
+
+    uint32_t steps_dec = 0.5 * current_speed * current_speed / stepper_param.deceleration; // steps required idealy for complete stop at current speed
+
+    if (remaining_steps > 0)
+    {
+        if (parity){
+            /* remaining_steps allow for later deceleration */
+            if (remaining_steps > steps_dec)
+            {
+
+                /* current_speed is inferior to max_speed -> acceleration */
+                if (current_speed < target_speed * 0.99)
+                {
+                    if (current_speed < stepper_param.min_speed)
+                    {
+                        current_speed = stepper_param.min_speed;
+                    }
+                    else
+                    {
+                        current_speed = stepper_param.acceleration / current_speed + current_speed; // v_{n+1}=a*t+v_n avec t=1/v
+                        if (current_speed > target_speed)
+                        {
+                            current_speed = target_speed;
+                        }
+                    }
+                }
+
+                /* current_speed is superior to max_speed -> deceleration */
+                else if (current_speed > 1.01 * target_speed)
+                {
+                    current_speed = -stepper_param.deceleration / current_speed + current_speed; // v_{n+1}=a*t+v_n avec t=1/v
+                    if (current_speed < target_speed)
+                    {
+                        current_speed = target_speed;
+                    }
+                }
+
+                /* current_speed is max_speed */
+                else
+                {
+                    current_speed = target_speed;
+                }
+            }
+
+            /* Remaining steps only allow for deceleration */
+            else
+            {
+                current_speed = (stepper_param.min_speed - current_speed) / (remaining_steps) + current_speed;
+                if (current_speed < stepper_param.min_speed)
+                {
+                    current_speed = stepper_param.min_speed;
+                }
+            }
+            waiting_time = 1000000. / current_speed;
+            digitalWrite(stepper_pinout.step1_pin, HIGH);
+            digitalWrite(stepper_pinout.step2_pin, HIGH);
+            parity = false;          
+        }
+        else{
+            digitalWrite(stepper_pinout.step1_pin, LOW);
+            digitalWrite(stepper_pinout.step2_pin, LOW);
+            remaining_steps -= 1;
+            *t0 = *t1;
+            parity=true;
+        }
+        // while (*t1 - *t0 < waiting_time)
+        // {
+        //     *t1 = esp_timer_get_time(); // delay for waiting_time
+        //     // vTaskDelay(pdMS_TO_TICKS(1));
+        // }
+        vTaskDelay(pdMS_TO_TICKS(waiting_time));
+        
+    }
+    else
+    {
+        //Serial.println("no steps");
+        vTaskDelay(pdMS_TO_TICKS(1));
+        return 0;
+    }
+    return 1;
 }

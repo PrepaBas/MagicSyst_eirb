@@ -28,7 +28,6 @@ void function1(){
     angle_to(0);
     protocol = BACKING;
     go_to_reverse({100, 865});
-    vTaskDelay(pdMS_TO_TICKS(1000));
     protocol = EMPTY_COMMUTE;
 
 }
@@ -92,7 +91,8 @@ void deposit_bl_cans_2(void* parameters){
     Serial.println("begining deposit_bl_cans2");
     set_speed(1.);
     rise_fork();
-    lower_fork();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    lower_fork(); 
     follow_to({400, 400});
     rise_fork();
     lower_fork();
@@ -105,6 +105,5 @@ void deposit_bl_cans_2(void* parameters){
     go_to({250, 865});
     rise_fork();
     go_to_reverse({500, 865});
-    follow_to({2000, 300});
     vTaskDelete(NULL);
 }

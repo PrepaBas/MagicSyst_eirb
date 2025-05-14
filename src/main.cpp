@@ -14,7 +14,6 @@ TaskHandle_t securityTask;
 TaskHandle_t currentTask;
 TaskHandle_t moveTask;
 
-
 /* Extern from stepperMotor*/
 extern uint32_t remaining_steps;
 extern uint32_t steps_done;
@@ -29,17 +28,19 @@ void setup() {
   rise_fork();
   lower_fork();
   rise_fork();
-  movement_begin(264., 71.8/2, 100, 865, 0);
+  movement_begin(261.9, 72.8/2, 100, 865, 0); // wheel diameter is 72.8 
 
   // init robot variables
   enable_steppers();
   set_speed(1);
   int robot_stop = 0;
 
+  
+    
   // Dispatch tasks
   xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);    
   delay(500);
-  xTaskCreate(moveTaskcode, "moveTask", 10000, &robot_stop, 2, &moveTask);  
+  xTaskCreate(moveTaskcode, "moveTask", 10000, &robot_stop, 3, &moveTask);  
   delay(500); 
   xTaskCreate(dispatchTaskcode, "dispatchTask", 10000, &robot_stop, 1, &dispatchTask);   
   delay(500);

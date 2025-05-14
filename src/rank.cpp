@@ -45,8 +45,9 @@ std::vector<Macro> begin_macro() {
 
 void dispatchTaskcode(void *parameters)
 {
-  vTaskDelay(pdMS_TO_TICKS(500));
+  vTaskDelay(pdMS_TO_TICKS(1000));
   int *robot_stop_ptr = (int *)parameters;
+  
   /* Creation of function structures */
   std::vector<Macro> list_macro = begin_macro();
 
@@ -68,6 +69,8 @@ void dispatchTaskcode(void *parameters)
       index++;
     }
     Macro best_macro = list_macro.at(position_macro);
+
+
     xTaskCreate(best_macro.function, "currentTask", 10000, NULL, 1, &currentTask);
 
     while (eTaskGetState(currentTask) != eDeleted)
