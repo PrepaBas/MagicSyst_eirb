@@ -88,9 +88,7 @@ void new_position(){
             break;
         default:
             break;
-        }
-    Serial.print("   ");
-    Serial.println(position.theta);    
+        }  
     steps_done = 0;
 }
 
@@ -115,7 +113,7 @@ void rotate (int direction, float angle){
     float distance = angle * baseWidth * PI / 360.;
     uint8_t step_mode = get_step_mode();
     uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*step_mode);
-    set_direction(direction?HIGH:LOW, direction?HIGH:LOW);
+    set_direction(direction?LOW:HIGH, direction?LOW:HIGH);
     steps_done = 0;
     remaining_steps = m_steps;
     last_move_type = direction?ROTATE_RIGHT:ROTATE_LEFT;

@@ -18,6 +18,7 @@ enum security_protocol{
     NO_SECURITY,
 };
 // Déclarations uniquement
+void baniere(void* param);
 void function1();
 void deposit_bl_cans(void* parameters);
 void deposit_tl_cans(void* parameters);
