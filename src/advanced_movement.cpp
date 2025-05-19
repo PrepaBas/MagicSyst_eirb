@@ -1,4 +1,20 @@
 /* Includes ------------------------------------------------------------------*/
+/*
++---------------------------- BACKSTAGE ----------------------------+
+|               [cannes6]                     [cannes3]             |
+|                                                                   |
+|+--------+                                              +--------+ |
+|| depo8  |                                              |  depo7 | |
+|+--------+                                              +--------+ |
+| [cannes7]                                               [cannes2] |
+|                                                                   |
+|            [cannes0]                        [cannes1]             |
+|                ↓                                ↓                 |
+| +--------+ +--------+ +--------+ +--------+ +--------+ +--------+ |
+| | depo0  | | depo1  | | depo3  | | depo4  | | depo5  | | depo6  | |
+| +--------+ +--------+ +--------+ +--------+ +--------+ +--------+ |
++---------------------------- BACKSTAGE ----------------------------+
+*/
 
 /* Arduino specific header files. */
 #include "Arduino.h"
@@ -10,6 +26,33 @@
 #include "FastTrig.h"
 
 struct position position = {0, 0, 0};
+struct cannes_dispo{ //position pour etre 10cm devant les cannes pour les chopper; à mesurer à la mano
+    position cannes0 = { , };
+    position cannes1 = { , };
+    position cannes2 = { , };
+    position cannes3 = { , };
+    position cannes4 = { , };
+    position cannes5 = { , };
+    position cannes6 = { , };
+    position cannes7 = { , };
+    position cannes8 = { , };
+    position cannes9 = { , };
+}
+
+struct depo{ //position des dépots pour placer les cannes
+    position depo0 = { , };
+    position depo1 = { , };
+    position depo2 = { , };
+    position depo3 = { , };
+    position depo4 = { , };
+    position depo5 = { , };
+    position depo6 = { , };
+    position depo7 = { , };
+    position depo8 = { , };
+    position depo9 = { , };
+    position depo10 = { , };
+    position depo11 = { , };
+}
 move_type_t last_move_type = STRAIGHT_FORWARD;
 float baseWidth;
 float wheelRadius;
@@ -441,3 +484,45 @@ void anti_follow_to(struct position pos){
     }
     /* Robot is at desired position */
 }
+
+
+
+void chipper_de_cannettes (position cannettesX, potision depoX){ //On considère la position en mettres, avec l'origine dans le coin en bas à droite 
+    follow_to(cannettesX);
+    if(cannesX = || cannesX = ){ //on veut les cannes en bas 
+        angle_to(270); //on regarde vers en bas
+    }
+    else if (cannesX =  || cannesX = ) {
+        angle_to(0);
+    }
+    else if (cannesX =  || cannesX = ) {
+        angle_to(90);
+    }
+    else if (cannesX =  || cannesX = ) {
+        angle_to(180);
+    }
+        
+    rise_fork();
+    move_straight(1, 12) //on avance pour les chopper
+    lower_fork();
+    move_straight(0, 12) //on fuis avec le butin
+    follow_to(depoX)
+
+    if(depoX = || depoX = ){ //on veut le depos en bas 
+        angle_to(270); //on regarde vers en bas
+    }
+    else if (depoX =  || depoX = ) {
+        angle_to(0);
+    }
+    else if (depoX =  || depoX = ) {
+        angle_to(90);
+    }
+    else if (depoX =  || depoX = ) {
+        angle_to(180);
+    }
+    move_straight(1, 12) //on avance pour drop le kakou kakou
+    rise_fork();
+    move_straight(0, 12) //super nickel on enlève
+}
+
+
