@@ -67,12 +67,11 @@ void new_position(){
     uint8_t step_mode = 16;
     float d = steps_to_distance(steps_done, wheelRadius, 200*step_mode);   
     float theta = get_theta();
-    Serial.print(theta);
     switch(last_move_type){
         case ROTATE_LEFT:
         {
             float full_angle = theta - d*360./(PI*baseWidth);
-            set_theta(full_angle);
+            set_theta(restrict_angle(full_angle));
             break;
         }
         case STRAIGHT_FORWARD:
@@ -84,11 +83,10 @@ void new_position(){
             set_y(position.y - d*isin(theta)); 
             break;
         case ROTATE_RIGHT:
-            set_theta(theta + d*360./(PI*baseWidth));
+            float full_angle = theta + d*360./(PI*baseWidth);
+            set_theta(restrict_angle(full_angle));
             break;
-        default:
-            break;
-        }  
+    }
     steps_done = 0;
 }
 

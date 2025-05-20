@@ -31,6 +31,8 @@ void resume_robot(int* robot_stop_ptr, uint32_t cut_steps){
 
 
 #define FRONT_EMPTY_STOP_DISTANCE 16
+
+#define FRONT_LOADED_STOP_DISTANCE 30
 void securityTaskcode(void *parameters)
 {   // 21, 19, 18, 5, 17, 16, 4
   NewPing fc(17, 17, 200); // front center
@@ -77,20 +79,36 @@ void securityTaskcode(void *parameters)
         if(fc_distance<FRONT_EMPTY_STOP_DISTANCE) detect = 1;
         break;
 
-      // case LOADED_COMMUTE:
-      // break;
-      // case EMPTY_APPROACH:
-      // break;
-      // case LOADED_APPROACH:
-      // break;
-      // case BACKING:
-      // break;
-      // case NO_SECURITY:
-      // break;
+      case LOADED_COMMUTE:
+      // front right sensor
+        fr_distance = fr.ping_cm();
+        if(!fr_distance) fr_distance = 200; 
+        if(fr_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
+
+        // front right sensor
+        fl_distance = fl.ping_cm();
+        if(!fl_distance) fl_distance = 200; 
+        if(fl_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
+
+        // center right sensor
+        fl_distance = fl.ping_cm();
+        if(!fc_distance) fc_distance = 200; 
+        if(fc_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
+        break;
+
+      case EMPTY_APPROACH:
+      break;
+      case LOADED_APPROACH:
+      break;
+      case BACKING:
+      break;
+      case NO_SECURITY:
+      break;
     }
     switch(status){
       case NO_STOP:
         if(detect){
+          Serial.println("stopping robot");
           uint32_t cut_steps = stop_robot(robot_stop_ptr);
           stop_timer = esp_timer_get_time();
           status = YES_STOP;
@@ -102,11 +120,12 @@ void securityTaskcode(void *parameters)
           stop_timer = esp_timer_get_time();
         }
         else if(esp_timer_get_time() - stop_timer > 3000000){
+          Serial.println("resuming robot");
           resume_robot(robot_stop_ptr, cut_steps);
           status = NO_STOP;
         }
         break;
     }
-    vTaskDelay(pdMS_TO_TICKS(10));
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
