@@ -14,24 +14,25 @@ uint32_t steps_done = 0;
  * @brief init stepper motor pinout and disable steppers
  * @paragraph NONE
  */
-void begin_steppers(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, uint8_t pin5, uint8_t pin6, uint8_t pin7, uint8_t pin8)
+void begin_steppers(uint8_t dir1, uint8_t dir2, uint8_t step1, uint8_t step2, uint8_t ms2, uint8_t ms1, uint8_t ms0, uint8_t enable)
 {
-    stepper_pinout = (stepper_pinout_t){pin1, pin2, pin3, pin4, pin5, pin6, pin7, pin8};
+    stepper_pinout = (stepper_pinout_t){dir1, dir2, step1, step2, ms0, ms1, ms2, enable};
     pinMode(stepper_pinout.step1_pin, OUTPUT);
     pinMode(stepper_pinout.step2_pin, OUTPUT);
     pinMode(stepper_pinout.dir1_pin, OUTPUT);
     pinMode(stepper_pinout.dir2_pin, OUTPUT);
     pinMode(stepper_pinout.ms1_pin, OUTPUT);
     pinMode(stepper_pinout.ms2_pin, OUTPUT);
-    pinMode(stepper_pinout.ms3_pin, OUTPUT);
+
+    //pinMode(stepper_pinout.ms3_pin, OUTPUT);
 
     // set step mode to 16th of a step
     digitalWrite(stepper_pinout.ms1_pin, HIGH);
-    digitalWrite(stepper_pinout.ms2_pin, LOW);
-    digitalWrite(stepper_pinout.ms3_pin, LOW);
+    digitalWrite(stepper_pinout.ms2_pin, HIGH);
+    //digitalWrite(stepper_pinout.ms3_pin, LOW);
 
     pinMode(stepper_pinout.en_pin, OUTPUT);
-    enable_steppers();
+    disable_steppers();
     stepper_param.acceleration*=stepper_param.step_mode;
     stepper_param.deceleration*=stepper_param.step_mode;
     stepper_param.min_speed*=stepper_param.step_mode;

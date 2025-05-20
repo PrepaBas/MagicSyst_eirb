@@ -5,6 +5,7 @@
 #include "basic_strat.h"
 #include "advanced_movement.h"
 #include "table.h"
+#include <ESP32Servo.h>
 
 #define MAP_DIAGONAL_SQUARED 13000000 // 2000**2 + 3000**2
 extern struct position position;
@@ -47,7 +48,10 @@ void dispatchTaskcode(void *parameters)
 {
   vTaskDelay(pdMS_TO_TICKS(1000));
   int *robot_stop_ptr = (int *)parameters;
+  //xTaskCreate(baniere, "currentTask", 10000, NULL, 1, &currentTask);
   
+  //vTaskDelay(pdMS_TO_TICKS(30000));
+
   /* Creation of function structures */
   std::vector<Macro> list_macro = begin_macro();
 

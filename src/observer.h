@@ -9,6 +9,11 @@ extern enum security_protocol protocol;
 
 extern TaskHandle_t currentTask;
 
+typedef enum observer_status{
+    NO_STOP,
+    YES_STOP,
+}status_t;
+
 typedef struct {
     int* stop_flag;
     enum security_protocol protocol;
