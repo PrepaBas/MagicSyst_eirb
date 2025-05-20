@@ -1,5 +1,6 @@
 
 #include <ESP32Servo.h>
+#include <Arduino.h>
 #include "NewPing.h"
 #include "observer.h"
 #include "advanced_movement.h"
@@ -31,17 +32,16 @@ void resume_robot(int* robot_stop_ptr, uint32_t cut_steps){
 
 
 #define FRONT_EMPTY_STOP_DISTANCE 16
-
 #define FRONT_LOADED_STOP_DISTANCE 30
 void securityTaskcode(void *parameters)
 {   // 21, 19, 18, 5, 17, 16, 4
-  NewPing fc(17, 17, 200); // front center
-  NewPing fr(19, 19, 200); // front right
-  NewPing fl(5, 5, 200); // front left
-  NewPing rr(17, 21, 200); // rear right
-  NewPing rl(17, 17, 200); // rear left
-  NewPing cn(17, 17, 200); // cans near
-  NewPing cf(17, 17, 200); // cans far
+  NewPing fc(1, 1, 50); // front center
+  NewPing fr(19, 19, 50); // front right
+  NewPing fl(5, 5, 50); // front left
+  NewPing rr(1, 1, 50); // rear right
+  NewPing rl(17, 17, 50); // rear left
+  NewPing cn(21, 21, 50); // cans near
+  NewPing cf(1, 1, 50); // cans far
 
   int *robot_stop_ptr = (int *)parameters;
 
@@ -58,6 +58,26 @@ void securityTaskcode(void *parameters)
   bool detect;
   unsigned long stop_timer;
 
+  // for(;;){
+  //       fr_distance = fr.ping_cm();
+  //       if(!fr_distance) fr_distance = 200;
+  //       Serial.print("fr = "); Serial.println(fr_distance);
+
+  //       fl_distance = fl.ping_cm();
+  //       if(!fl_distance) fl_distance = 200;
+  //       Serial.print("fl = "); Serial.println(fl_distance);
+
+  //       fr_distance = rr.ping_cm();
+  //       if(!rr_distance) rr_distance = 200;
+  //       Serial.print("rr = "); Serial.println(rr_distance);
+
+  //       rl_distance = rl.ping_cm();
+  //       if(!rl_distance) rl_distance = 200;
+  //       Serial.print("rl = "); Serial.println(rl_distance);
+  //     Serial.println("-------------");
+  //   vTaskDelay(pdMS_TO_TICKS(200));
+  // }
+
   for (;;)
   {
     detect = 0;
@@ -67,14 +87,16 @@ void securityTaskcode(void *parameters)
         fr_distance = fr.ping_cm();
         if(!fr_distance) fr_distance = 200; 
         if(fr_distance<FRONT_EMPTY_STOP_DISTANCE) detect = 1;
+        // Serial.print("fr = "); Serial.println(fr_distance);
 
         // front right sensor
         fl_distance = fl.ping_cm();
         if(!fl_distance) fl_distance = 200; 
         if(fl_distance<FRONT_EMPTY_STOP_DISTANCE) detect = 1;
+        // Serial.print("fl = "); Serial.println(fl_distance);
 
         // center right sensor
-        fl_distance = fl.ping_cm();
+        fc_distance = fc.ping_cm();
         if(!fc_distance) fc_distance = 200; 
         if(fc_distance<FRONT_EMPTY_STOP_DISTANCE) detect = 1;
         break;
@@ -91,7 +113,7 @@ void securityTaskcode(void *parameters)
         if(fl_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
 
         // center right sensor
-        fl_distance = fl.ping_cm();
+        fc_distance = fc.ping_cm();
         if(!fc_distance) fc_distance = 200; 
         if(fc_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
         break;
@@ -126,6 +148,6 @@ void securityTaskcode(void *parameters)
         }
         break;
     }
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
 }

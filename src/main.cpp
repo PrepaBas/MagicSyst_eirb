@@ -29,11 +29,12 @@ void bauTaskcode(void* param){
       vTaskSuspend(currentTask);
       vTaskSuspend(dispatchTask);
       vTaskSuspend(securityTask);
+      disable_steppers();
       while(1){
         vTaskDelay(pdMS_TO_TICKS(10000));
       }
     }
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(30));
   }
 }
 
@@ -51,12 +52,14 @@ void setup() {
   // init robot variables
   pinMode(BAU_PIN, INPUT);
   while(!digitalRead(BAU_PIN)){
-    Serial.println("waiting opening of bau");
+    Serial.println("waiting closing of bau");
     delay(100);
   }
   delay(100);
   Serial.println("starting emergency_stop_task");
+  delay(10);
   xTaskCreate(bauTaskcode, "emergency_stop_task", 1000, NULL, 4, &bau);
+  delay(300);
   enable_steppers();
   set_speed(1);
   int robot_stop = 0;
@@ -65,14 +68,17 @@ void setup() {
     
   // Dispatch tasks
   Serial.println("starting securityTask");
+  delay(10);
   xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);    
-  delay(500);
+  delay(200);
   Serial.println("starting moveTask");
+  delay(10);
   xTaskCreate(moveTaskcode, "moveTask", 10000, &robot_stop, 3, &moveTask);  
-  delay(500); 
+  delay(200); 
   Serial.println("starting dispatchtyTask");
+  delay(10);
   xTaskCreate(dispatchTaskcode, "dispatchTask", 10000, &robot_stop, 1, &dispatchTask);   
-  delay(500);
+  delay(200);
   Serial.println("all task are launched");
 }
 
