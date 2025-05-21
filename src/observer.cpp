@@ -20,7 +20,6 @@ uint32_t stop_robot(int *robot_stop_ptr)
     cut_steps = remaining_steps - steps_to_stop;
     remaining_steps = steps_to_stop;
   }
-  while(remaining_steps>1){vTaskDelay(pdMS_TO_TICKS(10));} // wait for complete stop of robot
   return cut_steps;
 }
 
@@ -60,7 +59,6 @@ void securityTaskcode(void *parameters)
   for (;;)
   {
     detect = 0;
-    Serial.print(protocol);
     switch(protocol){
       case EMPTY_COMMUTE:
         // front right sensor
@@ -111,7 +109,7 @@ void securityTaskcode(void *parameters)
       case NO_STOP:
         if(detect){
           Serial.println("stopping robot");
-          uint32_t cut_steps = stop_robot(robot_stop_ptr);
+          cut_steps = stop_robot(robot_stop_ptr);
           stop_timer = esp_timer_get_time();
           status = YES_STOP;
         }
@@ -124,6 +122,7 @@ void securityTaskcode(void *parameters)
         else if(esp_timer_get_time() - stop_timer > 3000000){
           Serial.println("resuming robot");
           resume_robot(robot_stop_ptr, cut_steps);
+          cut_steps = 0;
           status = NO_STOP;
         }
         break;

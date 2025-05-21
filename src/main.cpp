@@ -57,9 +57,9 @@ void setup() {
   }
   delay(100);
   Serial.println("starting emergency_stop_task");
-  delay(10);
+  vTaskDelay(pdMS_TO_TICKS(30));
   xTaskCreate(bauTaskcode, "emergency_stop_task", 1000, NULL, 4, &bau);
-  delay(300);
+  vTaskDelay(pdMS_TO_TICKS(300));
   enable_steppers();
   set_speed(1);
   int robot_stop = 0;
@@ -68,17 +68,17 @@ void setup() {
     
   // Dispatch tasks
   Serial.println("starting securityTask");
-  delay(10);
+  vTaskDelay(pdMS_TO_TICKS(30));
   xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);    
-  delay(200);
+  vTaskDelay(pdMS_TO_TICKS(300));
   Serial.println("starting moveTask");
-  delay(10);
+  vTaskDelay(pdMS_TO_TICKS(30));
   xTaskCreate(moveTaskcode, "moveTask", 10000, &robot_stop, 3, &moveTask);  
-  delay(200); 
+  vTaskDelay(pdMS_TO_TICKS(300)); 
   Serial.println("starting dispatchtyTask");
-  delay(10);
+  vTaskDelay(pdMS_TO_TICKS(30));
   xTaskCreate(dispatchTaskcode, "dispatchTask", 10000, &robot_stop, 1, &dispatchTask);   
-  delay(200);
+  vTaskDelay(pdMS_TO_TICKS(300));
   Serial.println("all task are launched");
 }
 

@@ -3,7 +3,7 @@
 #include "Arduino.h"
 
 /* Global Variables */
-stepper_parameters_t stepper_param = {300, 10, 400, 700, STEP_MODE_16};
+stepper_parameters_t stepper_param = {300, 10, 700, 700, STEP_MODE_16};
 stepper_pinout_t stepper_pinout;
 float current_speed = 0; // [Steps/sec]
 float target_speed = 2000;

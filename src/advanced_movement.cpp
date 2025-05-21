@@ -82,10 +82,11 @@ void new_position(){
             set_x(position.x - d*icos(theta));
             set_y(position.y - d*isin(theta)); 
             break;
-        case ROTATE_RIGHT:
+        case ROTATE_RIGHT:{
             float full_angle = theta + d*360./(PI*baseWidth);
             set_theta(restrict_angle(full_angle));
             break;
+        }
     }
     steps_done = 0;
 }

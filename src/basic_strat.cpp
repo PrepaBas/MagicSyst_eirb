@@ -5,15 +5,75 @@
 
 enum security_protocol protocol = NO_SECURITY;
 
+#define FRONT_OFFSET 160
+#define SAFETY_RADIUS 230
+
 // Création de l'objet Servo
 Servo gauche;
 Servo droite;
 int eq_g = 85; //+ sens déploiment
-int eq_d = 80; //- sens deploiment
+int eq_d = 85; //- sens deploiment
+
+void blue(void* param){
+    enable_steppers();
+    set_speed(1);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+    set_x(100);
+    set_y(865);
+    set_theta(0);
+
+    // rush to mid cans
+    move_straight(0, 200);
+    go_to({1000, 700}); 
+    go_to({1910, 700});
+    unfold_fork();
+    protocol = LOADED_COMMUTE;
+    set_speed(0.6);
+    
+    go_to({1910, 950-FRONT_OFFSET});
+    lower_fork(); // pickup
+
+    
+    set_speed(1);
+    go_to({1800, 350}); // deposit cans
+    angle_to(-90);
+    rise_fork();
+
+    set_speed(0.3);//crash into wall
+    move_straight(0, 350-FRONT_OFFSET+100); 
+    set_y(196);
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    set_speed(0.6);
+    move_straight(1, SAFETY_RADIUS);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+
+    //rush to second mid cans
+    set_speed(1);
+    go_to({1100, 700});
+    unfold_fork();
+
+    protocol = LOADED_COMMUTE;
+    set_speed(0.6);
+    go_to({1100, 950-FRONT_OFFSET});
+    lower_fork();
+
+    set_speed(1);
+    go_to({1700, 350});
+    rise_fork();
+
+    move_straight(1, SAFETY_RADIUS);
+    set_speed(1);
+
+    go_to({2700, 1800});
+}
+
 void baniere(void *param)
 {
-    gauche.attach(23);
-    droite.attach(22);
+    gauche.attach(15);
+    droite.attach(2);
     gauche.write(eq_g);
     droite.write(eq_d);
     vTaskDelay(pdMS_TO_TICKS(100));
@@ -29,12 +89,16 @@ void baniere(void *param)
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(2000));
     set_speed(0.6);
     move_straight(0, 300);
     set_speed(1);
-    vTaskDelete(NULL);
+    //vTaskDelete(NULL);
+
+    gauche.detach();
+    droite.detach();
 }
+
 
 void function1()
 {
@@ -42,7 +106,7 @@ void function1()
     set_speed(1);
     protocol = EMPTY_COMMUTE;
     vTaskDelay(pdMS_TO_TICKS(200));
-    set_x(100);
+    set_x(85);
     set_y(865);
     set_theta(0);
 
