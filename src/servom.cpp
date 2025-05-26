@@ -4,8 +4,9 @@
 
 Servo leftm;
 Servo rightm;
-#define UP 70
-#define MID 30
+#define UP 50
+#define MID 10
+
 #define DOWN 0
 #define UD_DELAY 500 // travel time between up and down
 

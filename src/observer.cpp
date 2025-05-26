@@ -8,7 +8,7 @@
 
 #define PIN 21
 #define SPEED_OF_SOUND 340
-#define STEPS_TO_STOP 200
+#define STEPS_TO_STOP 50
 
 
 uint32_t stop_robot(int *robot_stop_ptr)
@@ -28,18 +28,18 @@ void resume_robot(int* robot_stop_ptr, uint32_t cut_steps){
   *robot_stop_ptr = 0;
 }
 
-
-#define FRONT_EMPTY_STOP_DISTANCE 16
+#define MAX_D 50
+#define FRONT_EMPTY_STOP_DISTANCE 22
 #define FRONT_LOADED_STOP_DISTANCE 30
 void securityTaskcode(void *parameters)
 {   // 21, 19, 18, 5, 17, 16, 4
-  NewPing fc(1, 1, 50); // front center
-  NewPing fr(19, 19, 50); // front right
-  NewPing fl(5, 5, 50); // front left
-  NewPing rr(21, 21, 50); // rear right
-  NewPing rl(17, 17, 50); // rear left
-  //NewPing cn(21, 21, 50); // cans near
-  //NewPing cf(1, 1, 50); // cans far
+  NewPing fc(18, 18, MAX_D); // front center
+  NewPing fr(19, 19, MAX_D); // front right
+  NewPing fl(5, 5, MAX_D); // front left
+  NewPing rr(21, 21, MAX_D); // rear right
+  NewPing rl(17, 17, MAX_D); // rear left
+  //NewPing cn(21, 21, MAX_D); // cans near
+  //NewPing cf(1, 1, MAX_D); // cans far
 
   int *robot_stop_ptr = (int *)parameters;
 
@@ -63,36 +63,34 @@ void securityTaskcode(void *parameters)
       case EMPTY_COMMUTE:
         // front right sensor
         fr_distance = fr.ping_cm();
-        if(!fr_distance) fr_distance = 200; 
+        if(!fr_distance) fr_distance = MAX_D; 
         if(fr_distance<FRONT_EMPTY_STOP_DISTANCE) detect = 1;
-        // Serial.print("fr = "); Serial.println(fr_distance);
 
         // front right sensor
         fl_distance = fl.ping_cm();
-        if(!fl_distance) fl_distance = 200; 
+        if(!fl_distance) fl_distance = MAX_D; 
         if(fl_distance<FRONT_EMPTY_STOP_DISTANCE) detect = 1;
-        // Serial.print("fl = "); Serial.println(fl_distance);
 
         // center right sensor
         fc_distance = fc.ping_cm();
-        if(!fc_distance) fc_distance = 200; 
+        if(!fc_distance) fc_distance = MAX_D; 
         if(fc_distance<FRONT_EMPTY_STOP_DISTANCE) detect = 1;
         break;
 
       case LOADED_COMMUTE:
-      // front right sensor
+        // front right sensor
         fr_distance = fr.ping_cm();
-        if(!fr_distance) fr_distance = 200; 
+        if(!fr_distance) fr_distance = MAX_D; 
         if(fr_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
 
         // front right sensor
         fl_distance = fl.ping_cm();
-        if(!fl_distance) fl_distance = 200; 
+        if(!fl_distance) fl_distance = MAX_D; 
         if(fl_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
 
         // center right sensor
         fc_distance = fc.ping_cm();
-        if(!fc_distance) fc_distance = 200; 
+        if(!fc_distance) fc_distance = MAX_D; 
         if(fc_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
         break;
 
@@ -101,6 +99,13 @@ void securityTaskcode(void *parameters)
       case LOADED_APPROACH:
       break;
       case BACKING:
+        rr_distance = rr.ping_cm();
+        if(!rr_distance) rr_distance = MAX_D; 
+        if(rr_distance < 20) detect = 1;
+        
+        rl_distance = rl.ping_cm();
+        if(!rl_distance) rl_distance = MAX_D; 
+        if(rl_distance < 20) detect = 1;
       break;
       case NO_SECURITY:
       break;
@@ -119,7 +124,7 @@ void securityTaskcode(void *parameters)
         if(detect){
           stop_timer = esp_timer_get_time();
         }
-        else if(esp_timer_get_time() - stop_timer > 3000000){
+        else if(esp_timer_get_time() - stop_timer > 200*1000){
           Serial.println("resuming robot");
           resume_robot(robot_stop_ptr, cut_steps);
           cut_steps = 0;
@@ -127,6 +132,6 @@ void securityTaskcode(void *parameters)
         }
         break;
     }
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 }

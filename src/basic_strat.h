@@ -26,5 +26,6 @@ void go_home(void* parameters);
 void deposit_bl_cans_2(void* parameters);
 //hard strat
 void blue(void* param);
+void orange(void* param);
 
 #endif

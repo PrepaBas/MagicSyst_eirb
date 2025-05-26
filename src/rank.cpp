@@ -7,7 +7,11 @@
 #include "table.h"
 #include "servom.h"
 
+
+#define COLOR_PIN 34
+#define START_PIN 39
 #define MAP_DIAGONAL_SQUARED 13000000 // 2000**2 + 3000**2
+#define MAX_TIME 95000000
 extern struct position position;
 
 Macro::Macro(Function in_function, struct position in_start, struct position in_end, uint16_t in_runtime, uint8_t in_color, int in_scale)
@@ -44,18 +48,43 @@ std::vector<Macro> begin_macro() {
   return macros;
 }
 
+void timesup_timer_callback(void* args){
+  vTaskSuspendAll();  
+  for(;;){
+      vTaskDelay(pdMS_TO_TICKS(500000));
+  }
+}
+
 void dispatchTaskcode(void *parameters)
 {
   vTaskDelay(pdMS_TO_TICKS(1000));
   int *robot_stop_ptr = (int *)parameters;
   //xTaskCreate(baniere, "currentTask", 10000, NULL, 1, &currentTask);
   
+  pinMode(COLOR_PIN, INPUT);
+  pinMode(START_PIN, INPUT);
+
   // fold_fork();
+  while(!digitalRead(START_PIN)){
+  vTaskDelay(pdMS_TO_TICKS(100));
+  }
+  const esp_timer_create_args_t timer_args = {
+            .callback = &timesup_timer_callback,
+            .name = "time's up timer"
+  };
+  esp_timer_handle_t timesup_timer;
+  esp_timer_create(&timer_args, &timesup_timer);
+  esp_timer_start_once(timesup_timer, MAX_TIME);
+
   baniere(NULL);
-  vTaskDelay(pdMS_TO_TICKS(2000));
-  // blue(NULL);
-  for(;;){
-  vTaskDelay(pdMS_TO_TICKS(1000));}
+  if(digitalRead(COLOR_PIN)){
+    blue(NULL);
+  }
+  else{
+    orange(NULL);
+  }
+  // for(;;){
+  // vTaskDelay(pdMS_TO_TICKS(1000));}
 
   /* Creation of function structures */
   std::vector<Macro> list_macro = begin_macro();
