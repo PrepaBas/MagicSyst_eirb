@@ -5,9 +5,13 @@
 #include "basic_strat.h"
 #include "advanced_movement.h"
 #include "table.h"
-#include <ESP32Servo.h>
+#include "servom.h"
 
+
+#define COLOR_PIN 34
+#define START_PIN 39
 #define MAP_DIAGONAL_SQUARED 13000000 // 2000**2 + 3000**2
+#define MAX_TIME 95
 extern struct position position;
 
 Macro::Macro(Function in_function, struct position in_start, struct position in_end, uint16_t in_runtime, uint8_t in_color, int in_scale)
@@ -44,13 +48,57 @@ std::vector<Macro> begin_macro() {
   return macros;
 }
 
+
+TaskHandle_t timesupTask;
+void timesupTaskCode(void* args){
+  vTaskDelay(pdMS_TO_TICKS(MAX_TIME * 1000));
+  Serial.println("Theeee endddd");
+  vTaskSuspendAll();  
+  for(;;){
+      vTaskDelay(pdMS_TO_TICKS(5000));
+  }
+}
+
+
 void dispatchTaskcode(void *parameters)
 {
   vTaskDelay(pdMS_TO_TICKS(1000));
   int *robot_stop_ptr = (int *)parameters;
-  //xTaskCreate(baniere, "currentTask", 10000, NULL, 1, &currentTask);
   
-  //vTaskDelay(pdMS_TO_TICKS(30000));
+  // tirette
+  pinMode(COLOR_PIN, INPUT);
+  pinMode(START_PIN, INPUT);
+  while(digitalRead(START_PIN)){ // insert tirette
+  vTaskDelay(pdMS_TO_TICKS(100));
+  }
+  lower_fork();
+  while(!digitalRead(START_PIN)){ // pull tirette
+  vTaskDelay(pdMS_TO_TICKS(20));
+  }
+
+  // create timer for 100s
+  xTaskCreate(timesupTaskCode, "timesup_task", 1000, NULL, 4, &timesupTask);
+
+  // deploy baniere
+  baniere(NULL);
+
+  // choose strat depending on color
+  if(digitalRead(COLOR_PIN)){
+    blue(NULL);
+  }
+  else{
+    orange(NULL);
+  }
+
+
+
+
+
+
+
+
+  for(;;){
+  vTaskDelay(pdMS_TO_TICKS(1000));}
 
   /* Creation of function structures */
   std::vector<Macro> list_macro = begin_macro();

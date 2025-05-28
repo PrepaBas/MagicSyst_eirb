@@ -14,10 +14,5 @@ typedef enum observer_status{
     YES_STOP,
 }status_t;
 
-typedef struct {
-    int* stop_flag;
-    enum security_protocol protocol;
-}security_api_t;
-
 void securityTaskcode(void* parameters);
 #endif
