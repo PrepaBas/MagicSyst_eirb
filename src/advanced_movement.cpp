@@ -14,8 +14,12 @@ move_type_t last_move_type = STRAIGHT_FORWARD;
 float baseWidth;
 float wheelRadius;
 
+#define BOTTOM_LINE 670
+#define TOP_LINE 1300
+#define RIGHT_LINE 2340
+#define LEFT_LINE 650
 
-table table_coupe = {{650, 670}, {650, 1300}, {2340, 670}, {2340, 1300}, {3000, 2000}};
+table table_coupe = {{LEFT_LINE, BOTTOM_LINE}, {LEFT_LINE, TOP_LINE}, {RIGHT_LINE, BOTTOM_LINE}, {RIGHT_LINE, TOP_LINE}, {3000, 2000}};
  
 /* Setters and Getters -------------------------------------------------------*/
 void movement_begin(float base, float wheel, float x, float y, float theta){
@@ -65,6 +69,7 @@ float restrict_angle(float in_angle){
 void new_position(){
     /* update position using movement type and steps difference */
     uint8_t step_mode = 16;
+    if(!steps_done) return;
     float d = steps_to_distance(steps_done, wheelRadius, 200*step_mode);   
     float theta = get_theta();
     switch(last_move_type){
@@ -98,7 +103,6 @@ void move_straight (char direction, float distance){
     uint8_t step_mode = get_step_mode();
     uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*step_mode);
     set_direction(direction?LOW:HIGH, direction?HIGH:LOW);
-    steps_done = 0;
     remaining_steps = m_steps;
     last_move_type = direction?STRAIGHT_BACKWARD:STRAIGHT_FORWARD;
     while(remaining_steps){vTaskDelay(pdMS_TO_TICKS(30));}
@@ -113,7 +117,6 @@ void rotate (int direction, float angle){
     uint8_t step_mode = get_step_mode();
     uint64_t m_steps =  distance_to_steps(distance, wheelRadius, 200*step_mode);
     set_direction(direction?LOW:HIGH, direction?LOW:HIGH);
-    steps_done = 0;
     remaining_steps = m_steps;
     last_move_type = direction?ROTATE_RIGHT:ROTATE_LEFT;
     while(remaining_steps){vTaskDelay(pdMS_TO_TICKS(30));}

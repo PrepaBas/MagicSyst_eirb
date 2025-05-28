@@ -10,7 +10,7 @@
 #define SPEED_OF_SOUND 340
 #define STEPS_TO_STOP 50
 
-
+ 
 uint32_t stop_robot(int *robot_stop_ptr)
 {
   uint16_t steps_to_stop = STEPS_TO_STOP;
@@ -101,11 +101,11 @@ void securityTaskcode(void *parameters)
       case BACKING:
         rr_distance = rr.ping_cm();
         if(!rr_distance) rr_distance = MAX_D; 
-        if(rr_distance < 20) detect = 1;
+        if(rr_distance < 30) detect = 1;
         
         rl_distance = rl.ping_cm();
         if(!rl_distance) rl_distance = MAX_D; 
-        if(rl_distance < 20) detect = 1;
+        if(rl_distance < 30) detect = 1;
       break;
       case NO_SECURITY:
       break;
@@ -124,14 +124,14 @@ void securityTaskcode(void *parameters)
         if(detect){
           stop_timer = esp_timer_get_time();
         }
-        else if(esp_timer_get_time() - stop_timer > 200*1000){
+        else if(esp_timer_get_time() - stop_timer > 400*1000){
           Serial.println("resuming robot");
           resume_robot(robot_stop_ptr, cut_steps);
-          cut_steps = 0;
+          cut_steps = 0; 
           status = NO_STOP;
         }
         break;
     }
-    vTaskDelay(pdMS_TO_TICKS(10));
+    vTaskDelay(pdMS_TO_TICKS(20));
   }
 }

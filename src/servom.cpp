@@ -4,10 +4,14 @@
 
 Servo leftm;
 Servo rightm;
-#define UP 50
-#define MID 10
+#define UP_L 42
+#define UP_R 50
 
-#define DOWN 0
+#define MID_R 22
+#define MID_L 19
+
+#define DOWN_R 5
+#define DOWN_L 0
 #define UD_DELAY 500 // travel time between up and down
 
 uint8_t pin1;
@@ -28,24 +32,24 @@ void servo_terminate(){
 }
 
 void lower_fork(){
-    leftm.write(MID);
-    rightm.write(90-MID);
+    leftm.write(MID_L);
+    rightm.write(90-MID_R);
     
     vTaskDelay(pdMS_TO_TICKS(UD_DELAY));
 }
 
 void fold_fork(){
-    leftm.write(LOW);
-    rightm.write(90-LOW);
+    leftm.write(DOWN_L);
+    rightm.write(90-DOWN_R);
 }
 void unfold_fork(){
-    leftm.write(UP);
-    rightm.write(90-UP);
+    leftm.write(UP_L);
+    rightm.write(90-UP_R);
 }
 
 void rise_fork(){
-    rightm.write(90-UP);
-    leftm.write(UP);
+    rightm.write(90-UP_R);
+    leftm.write(UP_L);
    
     vTaskDelay(pdMS_TO_TICKS(UD_DELAY));
 }

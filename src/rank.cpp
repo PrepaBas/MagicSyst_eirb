@@ -11,7 +11,7 @@
 #define COLOR_PIN 34
 #define START_PIN 39
 #define MAP_DIAGONAL_SQUARED 13000000 // 2000**2 + 3000**2
-#define MAX_TIME 95000000
+#define MAX_TIME 95
 extern struct position position;
 
 Macro::Macro(Function in_function, struct position in_start, struct position in_end, uint16_t in_runtime, uint8_t in_color, int in_scale)
@@ -48,43 +48,57 @@ std::vector<Macro> begin_macro() {
   return macros;
 }
 
-void timesup_timer_callback(void* args){
+
+TaskHandle_t timesupTask;
+void timesupTaskCode(void* args){
+  vTaskDelay(pdMS_TO_TICKS(MAX_TIME * 1000));
+  Serial.println("Theeee endddd");
   vTaskSuspendAll();  
   for(;;){
-      vTaskDelay(pdMS_TO_TICKS(500000));
+      vTaskDelay(pdMS_TO_TICKS(5000));
   }
 }
+
 
 void dispatchTaskcode(void *parameters)
 {
   vTaskDelay(pdMS_TO_TICKS(1000));
   int *robot_stop_ptr = (int *)parameters;
-  //xTaskCreate(baniere, "currentTask", 10000, NULL, 1, &currentTask);
   
+  // tirette
   pinMode(COLOR_PIN, INPUT);
   pinMode(START_PIN, INPUT);
-
-  // fold_fork();
-  while(!digitalRead(START_PIN)){
+  while(digitalRead(START_PIN)){ // insert tirette
   vTaskDelay(pdMS_TO_TICKS(100));
   }
-  const esp_timer_create_args_t timer_args = {
-            .callback = &timesup_timer_callback,
-            .name = "time's up timer"
-  };
-  esp_timer_handle_t timesup_timer;
-  esp_timer_create(&timer_args, &timesup_timer);
-  esp_timer_start_once(timesup_timer, MAX_TIME);
+  lower_fork();
+  while(!digitalRead(START_PIN)){ // pull tirette
+  vTaskDelay(pdMS_TO_TICKS(20));
+  }
 
+  // create timer for 100s
+  xTaskCreate(timesupTaskCode, "timesup_task", 1000, NULL, 4, &timesupTask);
+
+  // deploy baniere
   baniere(NULL);
+
+  // choose strat depending on color
   if(digitalRead(COLOR_PIN)){
     blue(NULL);
   }
   else{
     orange(NULL);
   }
-  // for(;;){
-  // vTaskDelay(pdMS_TO_TICKS(1000));}
+
+
+
+
+
+
+
+
+  for(;;){
+  vTaskDelay(pdMS_TO_TICKS(1000));}
 
   /* Creation of function structures */
   std::vector<Macro> list_macro = begin_macro();

@@ -19,7 +19,6 @@ TaskHandle_t bau;
 
 /* Extern from stepperMotor*/
 extern uint32_t remaining_steps;
-extern uint32_t steps_done;
 #define BAU_PIN 36
 
 void bauTaskcode(void* param){
