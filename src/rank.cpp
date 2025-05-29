@@ -91,21 +91,32 @@ void dispatchTaskcode(void *parameters)
   xTaskCreate(timesupTaskCode, "timesup_task", 1000, NULL, 4, &timesupTask);
 set_speed(1); 
 // set_theta(90);
-// move_straight(0, 500);
-//   for(;;){}square_of_truth();
+
+//   for(;;){square_of_truth();}
 
   // deploy baniere
+
   baniere(NULL);
 
   // choose strat depending on color
   if(digitalRead(COLOR_PIN)){
     // Serial.println("Orange strat");
+    #ifndef UWU
     blue(NULL);
+    #endif
+    #ifdef UWU
+    blue_uwu(NULL);
+    #endif
     // homologation_bis();
   }
   else{
     // Serial.println("Blue strat");
+    #ifndef UWU
     orange(NULL);
+    #endif
+    #ifdef UWU
+    orange_uwu(NULL);
+    #endif
     // homologation();
   }
 

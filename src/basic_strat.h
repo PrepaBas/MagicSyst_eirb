@@ -7,6 +7,8 @@
 #include "StepperMotor.h"
 
 // #define SAVARY
+#define UWU
+#define NOOT_NOOT
 
 #define HIGH_SPEED 10000
 #define LOW_SPEED 2000
@@ -30,6 +32,8 @@ void deposit_bl_cans_2(void* parameters);
 //hard strat
 void blue(void* param);
 void orange(void* param);
+void blue_uwu(void* param);
+void orange_uwu(void* param);
 
 // homologation
 void homologation();

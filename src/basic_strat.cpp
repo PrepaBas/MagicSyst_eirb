@@ -7,7 +7,7 @@
 enum security_protocol protocol = NO_SECURITY;
 
 #define FRONT_OFFSET 160
-#define SAFETY_RADIUS 270
+#define SAFETY_RADIUS 280
 #define EXTRA 30
 #define CALES 100
 
@@ -33,11 +33,43 @@ void grab_cans(struct position cans_position){
     protocol = LOADED_COMMUTE;
 }
 
+void grab_cans_uwu(struct position cans_position){
+    float x = cans_position.x;
+    float y = cans_position.y;
+    float t = cans_position.theta;
+    go_to({x-(SAFETY_RADIUS+EXTRA)*icos(t), y-(SAFETY_RADIUS+EXTRA)*isin(t)});
+    rise_fork();
+    angle_to(t);
+    set_speed(0.6);
+    move_straight(0, SAFETY_RADIUS +EXTRA - FRONT_OFFSET + 20);
+    lower_fork();
+    protocol = BACKING;
+    move_straight(1, FRONT_OFFSET);
+    set_speed(1);
+    protocol = LOADED_COMMUTE;
+}
+
 void release_cans(struct position cans_position){
     float x = cans_position.x;
     float y = cans_position.y;
     float t = cans_position.theta;
     follow_to({x-SAFETY_RADIUS*icos(t), y-SAFETY_RADIUS*isin(t)});
+    angle_to(t);
+    set_speed(0.6);
+    move_straight(0, SAFETY_RADIUS - FRONT_OFFSET);
+    rise_fork();
+    protocol = BACKING;
+    move_straight(1, SAFETY_RADIUS - FRONT_OFFSET+50);
+    fold_fork();
+    set_speed(1);
+    protocol = EMPTY_COMMUTE;
+}
+
+void release_cans_uwu(struct position cans_position){
+    float x = cans_position.x;
+    float y = cans_position.y;
+    float t = cans_position.theta;
+    go_to({x-SAFETY_RADIUS*icos(t), y-SAFETY_RADIUS*isin(t)});
     angle_to(t);
     set_speed(0.6);
     move_straight(0, SAFETY_RADIUS - FRONT_OFFSET);
@@ -187,6 +219,98 @@ void blue(void* param){
 
 }
 
+void blue_uwu(void* param){
+    enable_steppers();
+    set_speed(1);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+    set_x(3000-1160);
+    set_y(87.5+25);
+    set_theta(90);    
+
+    // mid right cans
+    move_straight(0, 100);
+    grab_cans_uwu({3000-1100, 950, 90});
+    release_cans_uwu({3000-1250, 100, -90});
+    // go_to({3000-1300, 600});
+
+    // // mid left cans
+    // grab_cans_uwu({1100, 950, 90});
+    // go_to({3000-1200, 600});
+    // release_cans_uwu({3000-1300, 200, -90});
+        go_to({3000-900, 700});
+    // push cans of front
+    go_to({3000-775, 600});
+    unfold_fork();
+    angle_to(270);
+    set_speed(0.6);
+    move_straight(0, 600-100-FRONT_OFFSET);
+    set_speed(1);
+    protocol = BACKING;
+    move_straight(1, SAFETY_RADIUS);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+
+    // cans near backstages
+    go_to({3000-650, 1000});
+    grab_cans_uwu({3000-820, 1720, 90});
+    protocol = BACKING;
+    move_straight(1, 150);
+    protocol = LOADED_COMMUTE;
+    go_to({3000-360, 1675});
+    angle_to(90);
+    rise_fork();
+    protocol = BACKING;
+    move_straight(1, 10);
+}
+
+void orange_uwu(void* param){
+    enable_steppers();
+    set_speed(1);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+    set_x(1160);
+    set_y(87.5+25);
+    set_theta(90);    
+
+    move_straight(0, 120);  
+
+    // mid left cans
+    grab_cans_uwu({1100, 950, 90});
+    release_cans_uwu({1300, 100, -90});  
+
+
+        // mid right cans
+    // go_to({1200, 600});
+    // grab_cans_uwu({1100, 950, 90});
+    // go_to({1200, 600});
+    // release_cans_uwu({1250, 100, -90});
+    
+    // push cans of front
+    go_to({900, 650});
+    go_to({775, 600});
+    unfold_fork();
+    angle_to(270);
+    set_speed(0.6);
+    move_straight(0, 600-100-FRONT_OFFSET);
+    set_speed(1);
+    protocol = BACKING;
+    move_straight(1, SAFETY_RADIUS);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+
+    // cans near backstages
+    go_to({650, 1000});
+    grab_cans_uwu({820, 1720, 90});
+    protocol = BACKING;
+    move_straight(1, 150);
+    protocol = LOADED_COMMUTE;
+    go_to({360, 1675});
+    angle_to(90);
+    rise_fork();
+    protocol = BACKING;
+    move_straight(1, 10);
+}
 
 void baniere(void *param)
 {

@@ -46,7 +46,7 @@ void setup() {
   begin_steppers(12, 32, 13, 33, 25, 26, 27, 14);
   servo_begin(23, 22);
   // rise_fork();
-  movement_begin(261.9, 73./2, 100, 865, 0); // wheel diameter is 72.8 
+  movement_begin(261.3, 73./2, 100, 865, 0); // wheel diameter is 72.8 
 
   // init robot variables
   pinMode(BAU_PIN, INPUT);

@@ -15,7 +15,7 @@ extern position position;
 uint32_t stop_robot(int *robot_stop_ptr)
 {
   *robot_stop_ptr = 1; // update status
-  uint32_t cut_steps = 1; 
+  uint32_t cut_steps = 0; 
   if(remaining_steps > STEPS_TO_STOP){ // allow for slow stop
     cut_steps = remaining_steps - STEPS_TO_STOP;
     remaining_steps = STEPS_TO_STOP;
@@ -146,8 +146,9 @@ void securityTaskcode(void *parameters)
     Serial.print(position.x);
     Serial.print(";");
     Serial.print(position.y);
-    Serial.print(";");
-    Serial.println(position.theta - 90);
+    Serial.print(";");1
+
+    Serial.println(90-position.theta);
     protocol = NO_SECURITY;
     #endif
   }
