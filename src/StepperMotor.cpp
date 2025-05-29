@@ -3,7 +3,7 @@
 #include "Arduino.h"
 
 /* Global Variables */
-stepper_parameters_t stepper_param = {300, 10, 700, 700, STEP_MODE_16};
+stepper_parameters_t stepper_param = {300, 10, 300, 400, STEP_MODE_16};
 stepper_pinout_t stepper_pinout;
 float current_speed = 0; // [Steps/sec]
 float target_speed = 2000;
@@ -157,7 +157,7 @@ int move_task(uint64_t *t0, uint64_t *t1)
 void moveTaskcode(void *parameters)
 {
     // init task
-    Serial.println("beginng movetask");
+    // Serial.println("beginng movetask");
     vTaskDelay(pdMS_TO_TICKS(100));
     current_speed = 0;
     enable_steppers();
@@ -167,7 +167,7 @@ void moveTaskcode(void *parameters)
     // step falling edge is called, then computation, then th rising edge, then remaining time until timers match is elapsed, then timers are quickly updated; and the loop restarts
     uint64_t t1;
     uint64_t t0 = esp_timer_get_time();
-    Serial.println("move_task init");
+    // Serial.println("move_task init");
 
     int *robot_stop_ptr = (int *)parameters;
     // loop task

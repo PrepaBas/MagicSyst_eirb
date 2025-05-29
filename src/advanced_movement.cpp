@@ -14,10 +14,10 @@ move_type_t last_move_type = STRAIGHT_FORWARD;
 float baseWidth;
 float wheelRadius;
 
-#define BOTTOM_LINE 670
+#define BOTTOM_LINE 650
 #define TOP_LINE 1300
-#define RIGHT_LINE 2340
-#define LEFT_LINE 650
+#define RIGHT_LINE 2360
+#define LEFT_LINE 640
 
 table table_coupe = {{LEFT_LINE, BOTTOM_LINE}, {LEFT_LINE, TOP_LINE}, {RIGHT_LINE, BOTTOM_LINE}, {RIGHT_LINE, TOP_LINE}, {3000, 2000}};
  
@@ -199,14 +199,14 @@ int what_zone (struct position pos) {
         if(pos.y < table_coupe.bl.y) 
             return 1; // mid_bot
         if(pos.y < table_coupe.tl.y){ // middle section
-            if(pos.x<pos.y){
-                if(pos.x<table_coupe.extreme.y - pos.y) 
+            if(pos.x<1.5*pos.y){
+                if(pos.x<1.5*(table_coupe.extreme.y - pos.y)) 
                     return 7; // left_mid
                 else 
                     return 5; // mid_top
             }
             else{
-                if(pos.x<table_coupe.extreme.y - pos.y) 
+                if(pos.x<1.5*(table_coupe.extreme.y - pos.y)) 
                     return 1; // mid_bot
                 else 
                     return 3; // right_middle

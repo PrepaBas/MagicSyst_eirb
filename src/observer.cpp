@@ -8,17 +8,17 @@
 
 #define PIN 21
 #define SPEED_OF_SOUND 340
-#define STEPS_TO_STOP 50
+#define STEPS_TO_STOP 150
 
+extern position position;
  
 uint32_t stop_robot(int *robot_stop_ptr)
 {
-  uint16_t steps_to_stop = STEPS_TO_STOP;
   *robot_stop_ptr = 1; // update status
-  uint32_t cut_steps = 0; 
-  if(remaining_steps > steps_to_stop){ // allow for slow stop
-    cut_steps = remaining_steps - steps_to_stop;
-    remaining_steps = steps_to_stop;
+  uint32_t cut_steps = 1; 
+  if(remaining_steps > STEPS_TO_STOP){ // allow for slow stop
+    cut_steps = remaining_steps - STEPS_TO_STOP;
+    remaining_steps = STEPS_TO_STOP;
   }
   return cut_steps;
 }
@@ -28,13 +28,13 @@ void resume_robot(int* robot_stop_ptr, uint32_t cut_steps){
   *robot_stop_ptr = 0;
 }
 
-#define MAX_D 50
+#define MAX_D 200
 #define FRONT_EMPTY_STOP_DISTANCE 22
 #define FRONT_LOADED_STOP_DISTANCE 30
 void securityTaskcode(void *parameters)
 {   // 21, 19, 18, 5, 17, 16, 4
-  NewPing fc(18, 18, MAX_D); // front center
-  NewPing fr(19, 19, MAX_D); // front right
+  NewPing fc(19, 19, MAX_D); // front center
+  NewPing fr(18, 18, MAX_D); // front right
   NewPing fl(5, 5, MAX_D); // front left
   NewPing rr(21, 21, MAX_D); // rear right
   NewPing rl(17, 17, MAX_D); // rear left
@@ -50,8 +50,8 @@ void securityTaskcode(void *parameters)
   unsigned long fl_distance;
   unsigned long rl_distance;
   unsigned long rr_distance;
-  unsigned long cn_distance;
-  unsigned long cf_distance;
+  // unsigned long cn_distance;
+  // unsigned long cf_distance;
   uint32_t cut_steps = 0;
   bool detect;
   unsigned long stop_timer;
@@ -59,6 +59,16 @@ void securityTaskcode(void *parameters)
   for (;;)
   {
     detect = 0;
+//     vTaskDelay(pdMS_TO_TICKS(20));
+// Serial.print(" fr : ");
+//     Serial.print(fr.ping_cm());
+// Serial.print(" rl : ");
+//     Serial.print(fl.ping_cm());
+// Serial.print(" rr : ");
+//     Serial.print(rr.ping_cm());
+
+// Serial.print(" rl : ");
+//     Serial.println(rl.ping_cm());
     switch(protocol){
       case EMPTY_COMMUTE:
         // front right sensor
@@ -93,21 +103,18 @@ void securityTaskcode(void *parameters)
         if(!fc_distance) fc_distance = MAX_D; 
         if(fc_distance<FRONT_LOADED_STOP_DISTANCE) detect = 1;
         break;
-
-      case EMPTY_APPROACH:
-      break;
-      case LOADED_APPROACH:
-      break;
       case BACKING:
         rr_distance = rr.ping_cm();
         if(!rr_distance) rr_distance = MAX_D; 
-        if(rr_distance < 30) detect = 1;
+        if(rr_distance < 15) detect = 1;
         
         rl_distance = rl.ping_cm();
         if(!rl_distance) rl_distance = MAX_D; 
-        if(rl_distance < 30) detect = 1;
+        if(rl_distance < 15) detect = 1;
       break;
+
       case NO_SECURITY:
+        vTaskDelay(pdMS_TO_TICKS(30));
       break;
     }
     switch(status){
@@ -133,5 +140,15 @@ void securityTaskcode(void *parameters)
         break;
     }
     vTaskDelay(pdMS_TO_TICKS(20));
+
+    #ifdef SAVARY
+    new_position();
+    Serial.print(position.x);
+    Serial.print(";");
+    Serial.print(position.y);
+    Serial.print(";");
+    Serial.println(position.theta - 90);
+    protocol = NO_SECURITY;
+    #endif
   }
 }

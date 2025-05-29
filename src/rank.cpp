@@ -59,6 +59,16 @@ void timesupTaskCode(void* args){
   }
 }
 
+void square_of_truth(){
+  move_straight(0, 500), 
+  angle_to(0);
+  move_straight(0, 500), 
+  angle_to(270);
+  move_straight(0, 500), 
+  angle_to(180);
+  move_straight(0, 500), 
+  angle_to(90);
+}
 
 void dispatchTaskcode(void *parameters)
 {
@@ -66,28 +76,37 @@ void dispatchTaskcode(void *parameters)
   int *robot_stop_ptr = (int *)parameters;
   
   // tirette
-  pinMode(COLOR_PIN, INPUT);
+  pinMode(COLOR_PIN, INPUT_PULLUP);
   pinMode(START_PIN, INPUT);
   while(digitalRead(START_PIN)){ // insert tirette
   vTaskDelay(pdMS_TO_TICKS(100));
   }
-  lower_fork();
+  fold_fork();
   while(!digitalRead(START_PIN)){ // pull tirette
   vTaskDelay(pdMS_TO_TICKS(20));
+
   }
 
   // create timer for 100s
   xTaskCreate(timesupTaskCode, "timesup_task", 1000, NULL, 4, &timesupTask);
+set_speed(1); 
+// set_theta(90);
+// move_straight(0, 500);
+//   for(;;){}square_of_truth();
 
   // deploy baniere
   baniere(NULL);
 
   // choose strat depending on color
   if(digitalRead(COLOR_PIN)){
+    // Serial.println("Orange strat");
     blue(NULL);
+    // homologation_bis();
   }
   else{
+    // Serial.println("Blue strat");
     orange(NULL);
+    // homologation();
   }
 
 

@@ -4,13 +4,13 @@
 
 Servo leftm;
 Servo rightm;
-#define UP_L 42
-#define UP_R 50
+#define UP_L 45
+#define UP_R 55
 
-#define MID_R 22
-#define MID_L 19
+#define MID_R 27
+#define MID_L 18
 
-#define DOWN_R 5
+#define DOWN_R 3
 #define DOWN_L 0
 #define UD_DELAY 500 // travel time between up and down
 

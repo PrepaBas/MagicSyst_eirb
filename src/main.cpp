@@ -25,9 +25,9 @@ void bauTaskcode(void* param){
   for(;;){
     if(!digitalRead(BAU_PIN)){
       servo_terminate();
-      vTaskSuspend(currentTask);
-      vTaskSuspend(dispatchTask);
-      vTaskSuspend(securityTask);
+      vTaskDelete(currentTask);
+      vTaskDelete(dispatchTask);
+      vTaskDelete(securityTask);
       disable_steppers();
       while(1){
         vTaskDelay(pdMS_TO_TICKS(10000));
@@ -46,16 +46,16 @@ void setup() {
   begin_steppers(12, 32, 13, 33, 25, 26, 27, 14);
   servo_begin(23, 22);
   // rise_fork();
-  movement_begin(261.9, 72.8/2, 100, 865, 0); // wheel diameter is 72.8 
+  movement_begin(261.9, 73./2, 100, 865, 0); // wheel diameter is 72.8 
 
   // init robot variables
   pinMode(BAU_PIN, INPUT);
   while(!digitalRead(BAU_PIN)){
-    Serial.println("waiting closing of bau");
+    // Serial.println("waiting closing of bau");
     delay(100);
   }
   delay(100);
-  Serial.println("starting emergency_stop_task");
+  // Serial.println("starting emergency_stop_task");
   vTaskDelay(pdMS_TO_TICKS(30));
   xTaskCreate(bauTaskcode, "emergency_stop_task", 1000, NULL, 4, &bau);
   vTaskDelay(pdMS_TO_TICKS(300));
@@ -66,19 +66,24 @@ void setup() {
   
     
   // Dispatch tasks
-  Serial.println("starting securityTask");
+  // Serial.println("starting securityTask");
   vTaskDelay(pdMS_TO_TICKS(30));
-  xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);    
+  #ifdef SAVARY
+  xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 3, &securityTask);   
+  #endif
+  #ifndef SAVARY 
+  xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 2, &securityTask);   
+  #endif
   vTaskDelay(pdMS_TO_TICKS(300));
-  Serial.println("starting moveTask");
+  // Serial.println("starting moveTask");
   vTaskDelay(pdMS_TO_TICKS(30));
   xTaskCreate(moveTaskcode, "moveTask", 10000, &robot_stop, 3, &moveTask);  
   vTaskDelay(pdMS_TO_TICKS(300)); 
-  Serial.println("starting dispatchtyTask");
+  // Serial.println("starting dispatchtyTask");
   vTaskDelay(pdMS_TO_TICKS(30));
   xTaskCreate(dispatchTaskcode, "dispatchTask", 10000, &robot_stop, 1, &dispatchTask);   
   vTaskDelay(pdMS_TO_TICKS(300));
-  Serial.println("all task are launched");
+  // Serial.println("all task are launched");
 }
 
 

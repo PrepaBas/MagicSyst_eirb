@@ -6,6 +6,8 @@
 #include <ESP32Servo.h>
 #include "StepperMotor.h"
 
+// #define SAVARY
+
 #define HIGH_SPEED 10000
 #define LOW_SPEED 2000
 
@@ -17,6 +19,7 @@ enum security_protocol{
     BACKING,
     NO_SECURITY,
 };
+
 // Déclarations uniquement
 void baniere(void* param);
 void function1();
@@ -27,5 +30,9 @@ void deposit_bl_cans_2(void* parameters);
 //hard strat
 void blue(void* param);
 void orange(void* param);
+
+// homologation
+void homologation();
+void homologation_bis();
 
 #endif

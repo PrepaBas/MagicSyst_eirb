@@ -8,6 +8,8 @@ enum security_protocol protocol = NO_SECURITY;
 
 #define FRONT_OFFSET 160
 #define SAFETY_RADIUS 270
+#define EXTRA 30
+#define CALES 100
 
 // Création de l'objet Servo
 Servo gauche;
@@ -19,12 +21,14 @@ void grab_cans(struct position cans_position){
     float x = cans_position.x;
     float y = cans_position.y;
     float t = cans_position.theta;
-    follow_to({x-SAFETY_RADIUS*icos(t), y-SAFETY_RADIUS*isin(t)});
+    follow_to({x-(SAFETY_RADIUS+EXTRA)*icos(t), y-(SAFETY_RADIUS+EXTRA)*isin(t)});
     rise_fork();
     angle_to(t);
     set_speed(0.6);
-    move_straight(0, SAFETY_RADIUS - FRONT_OFFSET + 20);
+    move_straight(0, SAFETY_RADIUS +EXTRA - FRONT_OFFSET + 20);
     lower_fork();
+    protocol = BACKING;
+    move_straight(1, FRONT_OFFSET);
     set_speed(1);
     protocol = LOADED_COMMUTE;
 }
@@ -45,26 +49,94 @@ void release_cans(struct position cans_position){
     protocol = EMPTY_COMMUTE;
 }
 
+void line_of_truth(){
+    for(;;){
+            vTaskDelay(pdMS_TO_TICKS(500));
+            protocol = EMPTY_COMMUTE;
+            move_straight(0, 400);
+
+            vTaskDelay(pdMS_TO_TICKS(500));
+            protocol = BACKING;
+            move_straight(1, 400); 
+        }
+}
+
+void homologation(){
+    enable_steppers();
+    set_speed(1);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+    set_x(1160);
+    set_y(87.5+25);
+    set_theta(90);   
+
+    protocol = EMPTY_COMMUTE;
+    // mid left cans
+    grab_cans({1100, 950, 90});
+    release_cans({1250, 200, -90});
+
+}
+
+void homologation_bis(){
+    enable_steppers();
+    set_speed(1);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+    set_x(1160);
+    set_y(87.5+25);
+    set_theta(90);   
+
+    protocol = EMPTY_COMMUTE;
+    move_straight(0, 500);
+    angle_to(0);
+    line_of_truth();
+}
+
 void orange(void* param){
     enable_steppers();
     set_speed(1);
     fold_fork();
     protocol = EMPTY_COMMUTE;
-    set_x(1140);
+    set_x(1160);
     set_y(87.5+25);
-    set_theta(90);
+    set_theta(90);    
 
-
-    
-    grab_cans({1100, 960, 90});
+    // mid right cans
+    grab_cans({1900, 950, 90});
     release_cans({1250, 100, -90});
-    
-    grab_cans({1910, 960, 90});
+
+    // mid left cans
+    grab_cans({1100, 950, 90});
     release_cans({1250, 200, -90});
+    
+    // push cans of front
+    follow_to({775, 600});
+    unfold_fork();
+    angle_to(270);
+    move_straight(0, 600-100-FRONT_OFFSET);
+    protocol = BACKING;
+    move_straight(1, SAFETY_RADIUS);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
 
+    // cans far left
+    // grab_cans({75, 400, 180});
+    // protocol = BACKING;
+    // move_straight(1, SAFETY_RADIUS);
+    // protocol = LOADED_COMMUTE;
+    // release_cans({1250, 300, 270});
+
+    // cans near backstages
     grab_cans({820, 1720, 90});
+    protocol = BACKING;
+    move_straight(1, SAFETY_RADIUS);
+    protocol = LOADED_COMMUTE;
+    go_to({360, 1700});
+    angle_to(90);
+    rise_fork();
+    protocol = BACKING;
+    move_straight(1, 10);
 
-    go_to({450, 1700});
 }
 
 void blue(void* param){
@@ -72,22 +144,47 @@ void blue(void* param){
     set_speed(1);
     fold_fork();
     protocol = EMPTY_COMMUTE;
-
-    set_x(1860);
+    set_x(3000-1160);
     set_y(87.5+25);
-    set_theta(0);
+    set_theta(90);    
 
+    // mid right cans
+    grab_cans({3000-1100, 950, 90});
+    release_cans({3000-1250, 100, -90});
 
+    // mid left cans
+    grab_cans({1100, 950, 90});
+    release_cans({3000-1250, 200, -90});
     
-    grab_cans({1100, 960, 90});
-    release_cans({1750, 150, 270});
-    
-    grab_cans({1910, 960, 90});
-    release_cans({1750, 300, 270});
+    // push cans of front
+    follow_to({3000-775, 600});
+    unfold_fork();
+    angle_to(270);
+    move_straight(0, 600-100-FRONT_OFFSET);
+    protocol = BACKING;
+    move_straight(1, SAFETY_RADIUS);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
 
-    // grab_cans({820, 1720, 90});
+    // cans far left
+    // go_to({3000-75-SAFETY_RADIUS, 400});
+    // grab_cans({3000-75, 400, 0});
+    // protocol = BACKING;
+    // move_straight(1, SAFETY_RADIUS);
+    // protocol = LOADED_COMMUTE;
+    // release_cans({3000-1250, 300, -90});
 
-    // go_to({450, 1700});
+    // cans near backstages
+    grab_cans({3000-820, 1720, 90});
+    protocol = BACKING;
+    move_straight(1, 100);
+    protocol = LOADED_COMMUTE;
+    go_to({3000-360, 1675});
+    angle_to(90);
+    rise_fork();
+    protocol = BACKING;
+    move_straight(1, 10);
+
 }
 
 
@@ -102,7 +199,7 @@ void baniere(void *param)
     vTaskDelay(pdMS_TO_TICKS(100));
     set_speed(0.2);
     // move_straight(1, 300);
-    move_straight(0, 25);
+    move_straight(1, CALES-25);
     //move_straight(0, 15);
     vTaskDelay(pdMS_TO_TICKS(500));
     for (int i = 0; i < 60; i++)
@@ -120,8 +217,10 @@ void baniere(void *param)
     set_speed(1);
     //vTaskDelete(NULL);
 
+    #ifndef SAVARY
     gauche.detach();
     droite.detach();
+    #endif
 }
 
 
@@ -154,7 +253,7 @@ void function1()
 
 void deposit_bl_cans(void *parameters)
 {
-    Serial.println("begining deposit_bl_cans");
+    // Serial.println("begining deposit_bl_cans");
     set_speed(1.);
     rise_fork();
     /* go to cans */
@@ -181,7 +280,7 @@ void deposit_bl_cans(void *parameters)
 
 void deposit_tl_cans(void *parameters)
 {
-    Serial.println("begining deposit_tl_cans");
+    // Serial.println("begining deposit_tl_cans");
     set_speed(1);
     rise_fork();
 
@@ -199,7 +298,7 @@ void deposit_tl_cans(void *parameters)
 
 void go_home(void *parameters)
 {
-    Serial.println("begining go_home");
+    // Serial.println("begining go_home");
     lower_fork();
     rise_fork();
     set_speed(1.);
@@ -211,7 +310,7 @@ void go_home(void *parameters)
 
 void deposit_bl_cans_2(void *parameters)
 {
-    Serial.println("begining deposit_bl_cans2");
+    // Serial.println("begining deposit_bl_cans2");
     protocol = EMPTY_COMMUTE;
     set_speed(1.);
     rise_fork();
