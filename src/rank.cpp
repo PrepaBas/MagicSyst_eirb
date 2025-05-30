@@ -12,6 +12,8 @@
 #define START_PIN 39
 #define MAP_DIAGONAL_SQUARED 13000000 // 2000**2 + 3000**2
 #define MAX_TIME 95
+
+#define BLOCK for(;;){vTaskDelay(pdMS_TO_TICKS(1000));}
 extern struct position position;
 
 Macro::Macro(Function in_function, struct position in_start, struct position in_end, uint16_t in_runtime, uint8_t in_color, int in_scale)
@@ -89,43 +91,63 @@ void dispatchTaskcode(void *parameters)
 
   // create timer for 100s
   xTaskCreate(timesupTaskCode, "timesup_task", 1000, NULL, 4, &timesupTask);
-set_speed(1); 
-// set_theta(90);
+  unsigned long last_move_timer = esp_timer_get_time();
+  set_speed(1); 
 
+// set_theta(90);
 //   for(;;){square_of_truth();}
 
   // deploy baniere
-
   baniere(NULL);
+// line_of_truth();
+  // function1();
+  // delay(3)
+  //   last_move_blue(NULL);
+  
+  // BLOCK
+ 
 
   // choose strat depending on color
   if(digitalRead(COLOR_PIN)){
     // Serial.println("Orange strat");
-    #ifndef UWU
+    #ifdef NORMAL
     blue(NULL);
     #endif
     #ifdef UWU
     blue_uwu(NULL);
     #endif
+    #ifdef SUKA
+    blue_suka(NULL);
+    #endif
     // homologation_bis();
   }
   else{
     // Serial.println("Blue strat");
-    #ifndef UWU
+    #ifdef NORMAL
     orange(NULL);
     #endif
     #ifdef UWU
     orange_uwu(NULL);
     #endif
+    #ifdef SUKA
+    orange_suka(NULL);
+    #endif
     // homologation();
   }
 
+ #ifdef SAVARY
+    vTaskDelay(pdMS_TO_TICKS(5000));
+  #endif
+  #ifndef SAVARY
+  while(esp_timer_get_time()-last_move_timer < 88 * 1000000){
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
+  #endif
 
-
-
-
-
-
+  
+  if(digitalRead(COLOR_PIN)) last_move_blue(NULL);
+  else last_move_orange(NULL);
+  BLOCK
 
   for(;;){
   vTaskDelay(pdMS_TO_TICKS(1000));}

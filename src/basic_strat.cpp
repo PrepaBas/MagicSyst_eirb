@@ -8,7 +8,7 @@ enum security_protocol protocol = NO_SECURITY;
 
 #define FRONT_OFFSET 160
 #define SAFETY_RADIUS 280
-#define EXTRA 30
+#define EXTRA 40
 #define CALES 100
 
 // Création de l'objet Servo
@@ -16,6 +16,7 @@ Servo gauche;
 Servo droite;
 int eq_g = 85; //+ sens déploiment
 int eq_d = 85; //- sens deploiment
+
 
 void grab_cans(struct position cans_position){
     float x = cans_position.x;
@@ -41,7 +42,7 @@ void grab_cans_uwu(struct position cans_position){
     rise_fork();
     angle_to(t);
     set_speed(0.6);
-    move_straight(0, SAFETY_RADIUS +EXTRA - FRONT_OFFSET + 20);
+    move_straight(0, SAFETY_RADIUS + EXTRA - FRONT_OFFSET + 20);
     lower_fork();
     protocol = BACKING;
     move_straight(1, FRONT_OFFSET);
@@ -168,7 +169,6 @@ void orange(void* param){
     rise_fork();
     protocol = BACKING;
     move_straight(1, 10);
-
 }
 
 void blue(void* param){
@@ -216,7 +216,6 @@ void blue(void* param){
     rise_fork();
     protocol = BACKING;
     move_straight(1, 10);
-
 }
 
 void blue_uwu(void* param){
@@ -238,7 +237,7 @@ void blue_uwu(void* param){
     // grab_cans_uwu({1100, 950, 90});
     // go_to({3000-1200, 600});
     // release_cans_uwu({3000-1300, 200, -90});
-        go_to({3000-900, 700});
+    go_to({3000-900, 700});
     // push cans of front
     go_to({3000-775, 600});
     unfold_fork();
@@ -348,31 +347,169 @@ void baniere(void *param)
 }
 
 
+void blue_suka(void* param){
+    enable_steppers();
+    set_speed(1);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+    set_x(3000-1160);
+    set_y(87.5+25);
+    set_theta(90);    
+
+    // mid right cans
+    move_straight(0, 100);
+    grab_cans_uwu({3000-1100, 950, 90});
+    protocol = BACKING;
+    go_to_reverse({3000-1150, 400});
+    angle_to(180+25);
+    rise_fork();
+
+    // push front cans
+    go_to_reverse({3000-775, 600});
+    protocol = LOADED_COMMUTE;
+    angle_to({-90});
+    set_speed(0.5);
+    go_to({3000-775, 100+FRONT_OFFSET});
+    protocol = BACKING;
+    set_speed(1);
+    move_straight(1, 200);
+    fold_fork();
+
+    // cans near backstages
+    protocol = BACKING;
+    go_to_reverse({3000-700, 1000});
+    protocol = EMPTY_COMMUTE;
+    grab_cans_uwu({3000-820, 1720, 90});
+    protocol = BACKING;
+    move_straight(1, 150);
+    protocol = LOADED_COMMUTE;
+
+    // spare space for PAMI
+    go_to({3000-650, 1200});
+}
+
+void orange_suka(void* param){
+    enable_steppers();
+    set_speed(1);
+    fold_fork();
+    protocol = EMPTY_COMMUTE;
+    set_x(1160);
+    set_y(87.5+25);
+    set_theta(90);    
+
+    // mid right cans
+    move_straight(0, 100);
+    grab_cans_uwu({1100, 950, 90});
+    protocol = BACKING;
+    go_to_reverse({1150, 420});
+    angle_to(-25);
+    rise_fork();
+
+    // push front cans
+    go_to_reverse({775, 600});
+    angle_to({-90});
+    set_speed(0.5);
+    protocol = LOADED_COMMUTE;
+    go_to({775, 75+FRONT_OFFSET});
+    protocol = BACKING;
+    set_speed(1);
+    move_straight(1, 200);
+    fold_fork();
+
+    // cans near backstages
+    protocol = BACKING;
+    go_to_reverse({700, 1000});
+    protocol = EMPTY_COMMUTE;
+    grab_cans_uwu({820, 1720, 90});
+    protocol = BACKING;
+    move_straight(1, 150);
+    protocol = LOADED_COMMUTE;
+
+    // spare space for PAMI
+    go_to({650, 1300});
+}
+
 void function1()
 {
     enable_steppers();
     set_speed(1);
+    fold_fork();
     protocol = EMPTY_COMMUTE;
-    vTaskDelay(pdMS_TO_TICKS(200));
-    set_x(85);
-    set_y(865);
-    set_theta(0);
+    set_x(3000-(87.5+25));
+    set_y(807.5);
+    set_theta(180-0);    
 
-    follow_to({775, 570});
-    set_speed(0.5);
-    protocol = EMPTY_APPROACH;
-    go_to({775, 220});
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    protocol = BACKING;
-    go_to_reverse({775, 600});
+    rise_fork();
+    move_straight(0, 200);
 
+    // push front cans
+    go_to_reverse({3000-775, 600});
     protocol = LOADED_COMMUTE;
-    set_speed(1.);
-    follow_to({200, 865});
-    angle_to(0);
+    angle_to({-90});
+    set_speed(0.5);
+    go_to({3000-775, 75+FRONT_OFFSET});
     protocol = BACKING;
-    go_to_reverse({100, 865});
+    set_speed(1);
+    move_straight(1, 200);
+    fold_fork();
+
+    // cans near backstages
+    protocol = BACKING;
+    go_to_reverse({3000-700, 1000});
     protocol = EMPTY_COMMUTE;
+    grab_cans_uwu({3000-820, 1720, 90});
+    protocol = BACKING;
+    move_straight(1, 150);
+    protocol = LOADED_COMMUTE;
+
+    // spare space for PAMI
+    go_to({3000-650, 1300});
+
+}
+
+void last_move_blue(void* param){
+    protocol = LOADED_COMMUTE;
+    go_to({3000-450, 1500});
+    // angle_to(90);
+    rise_fork();
+    protocol = BACKING;
+    move_straight(1, 20);
+
+    // go_to_reverse({3000-450, 1325});
+    // protocol = LOADED_COMMUTE;
+    // go_to({3000-(75+FRONT_OFFSET), 1325});
+    // lower_fork();
+    // protocol = BACKING;
+    // go_to_reverse({3000-375, 1325});
+    // protocol = LOADED_COMMUTE;
+    // go_to({3000-375, 1450});
+    // rise_fork();
+    // protocol = BACKING;
+    // move_straight(1, 20);
+    
+  
+}
+
+void last_move_orange(void* param){
+    protocol = LOADED_COMMUTE;
+    go_to({450, 1500});
+    // angle_to(90);
+    rise_fork();
+    protocol = BACKING;
+move_straight(1, 20);
+    // go_to_reverse({450, 1325});
+    // protocol = LOADED_COMMUTE;
+    // go_to({(75+FRONT_OFFSET), 1325});
+    // lower_fork();
+    // protocol = BACKING;
+    // go_to_reverse({375, 1325});
+    // protocol = LOADED_COMMUTE;
+    // go_to({375, 1450});
+    // rise_fork();
+    // protocol = BACKING;
+    // move_straight(1, 20);
+    
+  
 }
 
 void deposit_bl_cans(void *parameters)

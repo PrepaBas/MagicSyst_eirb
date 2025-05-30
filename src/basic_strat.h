@@ -7,8 +7,10 @@
 #include "StepperMotor.h"
 
 // #define SAVARY
-#define UWU
-#define NOOT_NOOT
+
+// #define NORMAL
+// #define UWU
+#define SUKA
 
 #define HIGH_SPEED 10000
 #define LOW_SPEED 2000
@@ -22,6 +24,7 @@ enum security_protocol{
     NO_SECURITY,
 };
 
+void line_of_truth();
 // Déclarations uniquement
 void baniere(void* param);
 void function1();
@@ -34,9 +37,15 @@ void blue(void* param);
 void orange(void* param);
 void blue_uwu(void* param);
 void orange_uwu(void* param);
+void blue_suka(void* param);
+void orange_suka(void* param);
 
 // homologation
 void homologation();
 void homologation_bis();
+
+// last move
+void last_move_blue(void* param);
+void last_move_orange(void* param);
 
 #endif

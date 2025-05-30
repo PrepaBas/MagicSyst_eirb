@@ -12,9 +12,9 @@
 
 extern position position;
  
-uint32_t stop_robot(int *robot_stop_ptr)
+uint32_t stop_robot(int *stop_ptr)
 {
-  *robot_stop_ptr = 1; // update status
+  *stop_ptr = 1; // update status
   uint32_t cut_steps = 0; 
   if(remaining_steps > STEPS_TO_STOP){ // allow for slow stop
     cut_steps = remaining_steps - STEPS_TO_STOP;
@@ -23,9 +23,10 @@ uint32_t stop_robot(int *robot_stop_ptr)
   return cut_steps;
 }
 
-void resume_robot(int* robot_stop_ptr, uint32_t cut_steps){
-  remaining_steps = cut_steps;
-  *robot_stop_ptr = 0;
+void resume_robot(int* stop_ptr, uint32_t cut_steps){
+  *stop_ptr = 0;
+  vTaskDelay(pdMS_TO_TICKS(1));
+  remaining_steps += cut_steps;
 }
 
 #define MAX_D 200
@@ -146,7 +147,7 @@ void securityTaskcode(void *parameters)
     Serial.print(position.x);
     Serial.print(";");
     Serial.print(position.y);
-    Serial.print(";");1
+    Serial.print(";");
 
     Serial.println(90-position.theta);
     protocol = NO_SECURITY;
