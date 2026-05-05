@@ -6,10 +6,6 @@
 #include "table.h"
 
 
-/* Extern */
-extern uint32_t steps_done;
-extern uint32_t remaining_steps;
-
 /**
  * @brief different types of movement
  */

@@ -2,6 +2,22 @@
 #define STEPPER_H
 
 #include "Arduino.h"
+#include <TMCStepper.h>
+
+
+#define R_SENSE         0.11f
+#define DIAG_LED        8  
+
+// Pins d'après ton schéma KiCad
+#define STEP_L          21
+#define DIR_L           20
+#define STEP_R          0
+#define DIR_R           1
+
+// -------------------------------
+
+
+// Initialisation des deux drivers avec leurs adresses respectives
 
 /* objects */
 /**
@@ -14,6 +30,9 @@ typedef enum {
     STEP_MODE_8 = 8,
     STEP_MODE_16 = 16,
     STEP_MODE_32 = 32,
+    STEP_MODE_64 = 64,
+    STEP_MODE_128 = 128,
+    STEP_MODE_256 = 256
 } step_mode_t;
 
 
@@ -36,19 +55,22 @@ typedef struct {
     uint8_t dir2_pin;        // direction pin
     uint8_t step1_pin;       // step pin
     uint8_t step2_pin;
-    uint8_t ms1_pin;       // microstepping pin
-    uint8_t ms2_pin;       // microstepping pin
-    uint8_t ms3_pin;       // microstepping pin
-    uint8_t en_pin;        // reset pin, pull low to disable step pin and force motor to reset position
+    uint8_t en_pin;
 } stepper_pinout_t;
 
 void moveTaskcode(void* parameters);
 void set_direction(uint8_t first_stepper_dir, uint8_t second_stepper_dir);
-void begin_steppers(uint8_t dir1, uint8_t dir2, uint8_t step1, uint8_t step2, uint8_t ms2, uint8_t ms1, uint8_t ms0, uint8_t enable);
+void begin_steppers();
 void set_speed(float percentage_of_max_speed);
-int move_task(uint64_t* t0, uint64_t* t1);
 void disable_steppers();
 void enable_steppers();
 step_mode_t get_step_mode();
+int stop_stepper();
+
+int is_stepper_running();
+void stepper_move(uint64_t steps, int dirL, int dirR);
+
+int32_t get_pose_right();
+int32_t get_pose_left();
 
 #endif

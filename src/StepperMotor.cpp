@@ -1,196 +1,147 @@
-
 #include "StepperMotor.h"
-#include "Arduino.h"
+#include <FastAccelStepper.h>
+#include <TMCStepper.h>
 
-/* Global Variables */
-stepper_parameters_t stepper_param = {350, 10, 250, 500, STEP_MODE_16};
-stepper_pinout_t stepper_pinout;
-float current_speed = 0; // [Steps/sec]
-float target_speed = 2000;
-uint32_t remaining_steps = 0;
-uint32_t steps_done = 0;
 
-/**
- * @brief init stepper motor pinout and disable steppers
- * @paragraph NONE
- */
-void begin_steppers(uint8_t dir1, uint8_t dir2, uint8_t step1, uint8_t step2, uint8_t ms2, uint8_t ms1, uint8_t ms0, uint8_t enable)
-{
-    stepper_pinout = (stepper_pinout_t){dir1, dir2, step1, step2, ms0, ms1, ms2, enable};
-    pinMode(stepper_pinout.step1_pin, OUTPUT);
-    pinMode(stepper_pinout.step2_pin, OUTPUT);
-    pinMode(stepper_pinout.dir1_pin, OUTPUT);
-    pinMode(stepper_pinout.dir2_pin, OUTPUT);
-    pinMode(stepper_pinout.ms1_pin, OUTPUT);
-    pinMode(stepper_pinout.ms2_pin, OUTPUT);
+#define TMCSerial Serial1 
 
-    //pinMode(stepper_pinout.ms3_pin, OUTPUT);
+// Objets pour la génération d'impulsions matérielles
+FastAccelStepperEngine engine = FastAccelStepperEngine();
+FastAccelStepper *stepperL = NULL;
+FastAccelStepper *stepperR = NULL;
 
-    // set step mode to 16th of a step
-    digitalWrite(stepper_pinout.ms1_pin, HIGH);
-    digitalWrite(stepper_pinout.ms2_pin, HIGH);
-    //digitalWrite(stepper_pinout.ms3_pin, LOW);
+// Objets pour la configuration UART (TMC)
+TMC2209Stepper driverL(&TMCSerial, R_SENSE, 0); 
+TMC2209Stepper driverR(&TMCSerial, R_SENSE, 1); 
 
-    pinMode(stepper_pinout.en_pin, OUTPUT);
-    disable_steppers();
-    stepper_param.acceleration*=stepper_param.step_mode;
-    stepper_param.deceleration*=stepper_param.step_mode;
-    stepper_param.min_speed*=stepper_param.step_mode;
-    stepper_param.max_speed *=stepper_param.step_mode;
+// Paramètres physiques
+stepper_parameters_t stepper_param = {30000.0, 10.0, 200.0, 200.0 , STEP_MODE_128};
+
+void begin_steppers() {
+    // 1. Initialisation UART (indispensable pour le courant/microsteps)
+    TMCSerial.begin(115200, SERIAL_8N1, 6, 5);
+    delay(500);
+
+    driverL.begin();
+    driverL.rms_current(800); 
+    driverL.microsteps(128);
+
+    driverR.begin();
+    driverR.rms_current(800);
+    driverR.microsteps(128);
+
+    enable_steppers(); // Active les moteurs après configuration
+
+    // 2. Initialisation du moteur de mouvement matériel
+    engine.init();
+    stepperL = engine.stepperConnectToPin(STEP_L);
+    stepperR = engine.stepperConnectToPin(STEP_R);
+
+    if (stepperL && stepperR) {
+        // Configuration des pins DIR
+        stepperL->setDirectionPin(DIR_L);
+        stepperR->setDirectionPin(DIR_R);
+
+        // Application des rampes (en Pas/s et Pas/s²)
+        stepperL->setAcceleration(stepper_param.acceleration * stepper_param.step_mode);
+        stepperR->setAcceleration(stepper_param.acceleration * stepper_param.step_mode);
+        
+        stepperL->setSpeedInHz(stepper_param.max_speed * stepper_param.step_mode);
+        stepperR->setSpeedInHz(stepper_param.max_speed * stepper_param.step_mode);
+    }
+
+    if (driverL.test_connection() == 0 && driverR.test_connection() == 0) {
+        Serial.println("TMC2209 connected successfully");
+    }
+    else {
+        Serial.println("Failed to connect to TMC2209");
+    }
 }
 
-step_mode_t get_step_mode()
-{
+
+int is_stepper_running(){
+    return stepperL->isRunning() || stepperR->isRunning();
+}
+
+void stepper_move(uint64_t steps, int dirL, int dirR){
+    if(dirL == 1) stepperL->move(steps);
+    else stepperL->move(-steps);
+
+    if(dirR == 1) stepperR->move(steps);
+    else stepperR->move(-steps);
+}
+
+int stop_stepper(){
+    stepperL->stopMove();
+    stepperR->stopMove();
+    return 0;
+}
+
+step_mode_t get_step_mode(){
     return stepper_param.step_mode;
 }
 
-void set_direction(uint8_t first_stepper_dir, uint8_t second_stepper_dir)
-{
-    digitalWrite(stepper_pinout.dir2_pin, second_stepper_dir);
-    digitalWrite(stepper_pinout.dir1_pin, first_stepper_dir);
+int32_t get_pose_left(){
+    // Récupère la position actuelle du moteur gauche
+    return stepperL->getCurrentPosition();
 }
 
-void set_speed(float percentage_of_max_speed)
-{
-    target_speed = stepper_param.max_speed * percentage_of_max_speed;
-    if (target_speed < stepper_param.min_speed)
-    {
-        target_speed = stepper_param.min_speed;
-    }
-}
-/**
- * @brief cut courant of stepper motors
- */
-void disable_steppers()
-{
-    digitalWrite(stepper_pinout.en_pin, HIGH);
+int32_t get_pose_right(){
+    // Récupère la position actuelle du moteur droit
+    return stepperR->getCurrentPosition();
 }
 
-/**
- * @brief enable courant of stepper motors
- */
-void enable_steppers()
-{
-    digitalWrite(stepper_pinout.en_pin, LOW);
+void disable_steppers(){
+    driverL.toff(0); // Désactive les moteurs
+    driverR.toff(0);
+}
+void enable_steppers(){
+    driverL.toff(4); // Réactive les moteurs avec la configuration précédente
+    driverR.toff(4);
 }
 
-/**
- * @brief send intruction for 1 step and delay up to calculated time for speed control.
- */
-int move_task(uint64_t *t0, uint64_t *t1)
-{
-
-    uint32_t steps_dec = 0.5 * current_speed * current_speed / stepper_param.deceleration; // steps required idealy for complete stop at current speed
-
-    if (remaining_steps > 0)
-    {
-
-        /* remaining_steps allow for later deceleration */
-        if (remaining_steps > steps_dec)
-        {
-
-            /* current_speed is inferior to max_speed -> acceleration */
-            if (current_speed < target_speed * 0.99)
-            {
-                if (current_speed < stepper_param.min_speed)
-                {
-                    current_speed = stepper_param.min_speed;
-                }
-                else
-                {
-                    current_speed = stepper_param.acceleration / current_speed + current_speed; // v_{n+1}=a*t+v_n avec t=1/v
-                    if (current_speed > target_speed)
-                    {
-                        current_speed = target_speed;
-                    }
-                }
-            }
-
-            /* current_speed is superior to max_speed -> deceleration */
-            else if (current_speed > 1.01 * target_speed)
-            {
-                current_speed = -stepper_param.deceleration / current_speed + current_speed; // v_{n+1}=a*t+v_n avec t=1/v
-                if (current_speed < target_speed)
-                {
-                    current_speed = target_speed;
-                }
-            }
-
-            /* current_speed is max_speed */
-            else
-            {
-                current_speed = target_speed;
-            }
-        }
-
-        /* Remaining steps only allow for deceleration */
-        else
-        {
-            current_speed = (stepper_param.min_speed - current_speed) / (remaining_steps) + current_speed;
-            if (current_speed < stepper_param.min_speed)
-            {
-                current_speed = stepper_param.min_speed;
-            }
-        }
-        uint64_t waiting_time = 1000000. / current_speed;
-        digitalWrite(stepper_pinout.step1_pin, HIGH);
-        digitalWrite(stepper_pinout.step2_pin, HIGH);
-        while (*t1 - *t0 < waiting_time)
-        {
-            *t1 = esp_timer_get_time(); // delay for waiting_time
-            // vTaskDelay(pdMS_TO_TICKS(1));
-        }
-        digitalWrite(stepper_pinout.step1_pin, LOW);
-        digitalWrite(stepper_pinout.step2_pin, LOW);
-        remaining_steps -= 1;
-        *t0 = *t1;
-    }
-    else
-    {
-        //Serial.println("no steps");
-        vTaskDelay(pdMS_TO_TICKS(1));
-        return 0;
-    }
-    return 1;
+void set_direction(uint8_t dirL, uint8_t dirR) {
+    // Inutile avec moveTo(), mais conservé si tu utilises moveRelative
 }
 
-void moveTaskcode(void *parameters)
-{
-    // init task
-    // Serial.println("beginng movetask");
-    vTaskDelay(pdMS_TO_TICKS(100));
-    current_speed = 0;
-    enable_steppers();
-    set_speed(0);
+void set_speed(float percentage) {
+    uint32_t speed = stepper_param.max_speed * percentage;
+    if (speed < stepper_param.min_speed) speed = stepper_param.min_speed;
+    stepperL->setSpeedInHz(speed);
+    stepperR->setSpeedInHz(speed);
+}
 
-    // Timers are used to allow for non-blocking stepper control as well as to allow for cumputation time.
-    // step falling edge is called, then computation, then th rising edge, then remaining time until timers match is elapsed, then timers are quickly updated; and the loop restarts
-    uint64_t t1;
-    uint64_t t0 = esp_timer_get_time();
-    // Serial.println("move_task init");
+// Remplacement de move_task par une commande asynchrone
+void prepare_movement(long stepsL, long stepsR) {
+    stepperL->move(stepsL);
+    stepperR->move(stepsR);
+}
 
+void moveTaskcode(void *parameters) {
     int *robot_stop_ptr = (int *)parameters;
-    // loop task
-    for (;;)
-    {
-        // Serial.println("beginng step");
-        if(*robot_stop_ptr)
-        {
-            if(remaining_steps == 1)
-            {
-                vTaskDelay(pdMS_TO_TICKS(10));
+    
+    for (;;) {
+        if (*robot_stop_ptr) {
+            Serial.println("Emergency stop triggered! Stopping motors...");
+            // 1. Sauvegarder les positions cibles actuelles avant d'arrêter
+            int32_t targetL = stepperL->getPositionAfterCommandsCompleted();
+            int32_t targetR = stepperR->getPositionAfterCommandsCompleted();
+
+            // 2. Arrêt d'urgence
+            stepperL->stopMove();
+            stepperR->stopMove();
+            
+            // 3. Attendre que l'obstacle soit parti
+            while(*robot_stop_ptr) {
+                vTaskDelay(pdMS_TO_TICKS(100));
             }
-        }
-        else if (move_task(&t0, &t1))
-        {
-            steps_done++;
+
+            Serial.println("Resuming movement to target positions...");
+            // 4. REPRISE : Renvoyer les moteurs vers la cible initiale
+            stepperL->moveTo(targetL);
+            stepperR->moveTo(targetR);
         }
         
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
-
-////////////////////////////////////////////////////////////
-
-bool parity = true;
-uint64_t waiting_time;
-

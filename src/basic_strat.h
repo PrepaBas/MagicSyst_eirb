@@ -7,10 +7,7 @@
 #include "StepperMotor.h"
 
 // #define SAVARY
-
-// #define NORMAL
-// #define UWU
-#define SUKA
+// #define PRINT_DISTANCE
 
 #define HIGH_SPEED 10000
 #define LOW_SPEED 2000
@@ -25,27 +22,5 @@ enum security_protocol{
 };
 
 void line_of_truth();
-// Déclarations uniquement
-void baniere(void* param);
 void function1();
-void deposit_bl_cans(void* parameters);
-void deposit_tl_cans(void* parameters);
-void go_home(void* parameters);
-void deposit_bl_cans_2(void* parameters);
-//hard strat
-void blue(void* param);
-void orange(void* param);
-void blue_uwu(void* param);
-void orange_uwu(void* param);
-void blue_suka(void* param);
-void orange_suka(void* param);
-
-// homologation
-void homologation();
-void homologation_bis();
-
-// last move
-void last_move_blue(void* param);
-void last_move_orange(void* param);
-
 #endif
