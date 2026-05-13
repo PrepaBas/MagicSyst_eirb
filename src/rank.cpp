@@ -80,6 +80,10 @@ void dispatchTaskcode(void *parameters)
   vTaskDelay(pdMS_TO_TICKS(1000));
   int *robot_stop_ptr = (int *)parameters;
   // pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+
+
+  //STRAT HERE
   while(1){
     square_of_truth();
     vTaskDelay(pdMS_TO_TICKS(500));

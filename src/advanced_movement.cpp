@@ -221,7 +221,7 @@ int what_zone (struct position pos) {
 }
 
 /**
- * robots go to coordinates following imaginary path to avoid obvious obstacles
+ * robots go to coordinates following imaginary path to avoid obvious obstacles (OBSOLETE since 2025)
  */
 void follow_to(struct position pos){
     /* Zones finding */

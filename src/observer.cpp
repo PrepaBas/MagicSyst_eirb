@@ -69,7 +69,7 @@ void securityTaskcode(void *parameters)
           Serial.println("Obstacle ! Arrêt du robot.");
           *robot_stop_ptr = 1;
           // Freinage matériel immédiat
-          stop_stepper();
+          // stop_stepper();
           
           stop_timer = millis();
           status = YES_STOP;

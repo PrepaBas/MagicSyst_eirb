@@ -17,6 +17,8 @@ TMC2209Stepper driverR(&TMCSerial, R_SENSE, 1);
 // Paramètres physiques
 stepper_parameters_t stepper_param = {30000.0, 10.0, 200.0, 200.0 , STEP_MODE_128};
 
+bool robot_stop = false; // Flag d'arrêt d'urgence partagé entre les tâches
+
 void begin_steppers() {
     // 1. Initialisation UART (indispensable pour le courant/microsteps)
     TMCSerial.begin(115200, SERIAL_8N1, 6, 5);
@@ -58,45 +60,12 @@ void begin_steppers() {
     }
 }
 
-
-int is_stepper_running(){
-    return stepperL->isRunning() || stepperR->isRunning();
-}
-
-void stepper_move(uint64_t steps, int dirL, int dirR){
-    if(dirL == 1) stepperL->move(steps);
-    else stepperL->move(-steps);
-
-    if(dirR == 1) stepperR->move(steps);
-    else stepperR->move(-steps);
-}
-
-int stop_stepper(){
-    stepperL->stopMove();
-    stepperR->stopMove();
-    return 0;
-}
-
-step_mode_t get_step_mode(){
-    return stepper_param.step_mode;
-}
-
-int32_t get_pose_left(){
-    // Récupère la position actuelle du moteur gauche
-    return stepperL->getCurrentPosition();
-}
-
-int32_t get_pose_right(){
-    // Récupère la position actuelle du moteur droit
-    return stepperR->getCurrentPosition();
-}
-
 void disable_steppers(){
     driverL.toff(0); // Désactive les moteurs
     driverR.toff(0);
 }
 void enable_steppers(){
-    driverL.toff(4); // Réactive les moteurs avec la configuration précédente
+    driverL.toff(4); 
     driverR.toff(4);
 }
 
@@ -122,6 +91,7 @@ void moveTaskcode(void *parameters) {
     
     for (;;) {
         if (*robot_stop_ptr) {
+            robot_stop = true; 
             Serial.println("Emergency stop triggered! Stopping motors...");
             // 1. Sauvegarder les positions cibles actuelles avant d'arrêter
             int32_t targetL = stepperL->getPositionAfterCommandsCompleted();
@@ -131,6 +101,9 @@ void moveTaskcode(void *parameters) {
             stepperL->stopMove();
             stepperR->stopMove();
             
+            while(stepperL->isRunning() || stepperR->isRunning()) {
+                vTaskDelay(pdMS_TO_TICKS(10));
+            }
             // 3. Attendre que l'obstacle soit parti
             while(*robot_stop_ptr) {
                 vTaskDelay(pdMS_TO_TICKS(100));
@@ -140,8 +113,11 @@ void moveTaskcode(void *parameters) {
             // 4. REPRISE : Renvoyer les moteurs vers la cible initiale
             stepperL->moveTo(targetL);
             stepperR->moveTo(targetR);
+
+            robot_stop = false; 
         }
         
         vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
+

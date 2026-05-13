@@ -69,7 +69,7 @@ void setup() {
   
     
   // Dispatch tasks
-  // Serial.println("starting securityTask");
+  Serial.println("starting securityTask");
   vTaskDelay(pdMS_TO_TICKS(30));
   #ifdef SAVARY
   xTaskCreate(securityTaskcode, "securityTask", 10000, &robot_stop, 3, &securityTask);   
